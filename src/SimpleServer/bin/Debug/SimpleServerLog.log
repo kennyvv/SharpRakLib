@@ -251,3 +251,4 @@
 2016-07-18 02:41:18,245 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
 2016-07-18 02:41:18,245 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
 2016-07-18 02:47:06,807 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 03:07:18,554 [1] INFO  SimpleServer.SimpleServer - SimpleServer is now running!

@@ -18,3 +18,13 @@ C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SimpleServer\bi
 C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SimpleServer\bin\Debug\LibNoise.xml
 C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SimpleServer\bin\Debug\Microsoft.AspNet.Identity.Core.xml
 C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SimpleServer\bin\Debug\Newtonsoft.Json.xml
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\SimpleServer.exe.config
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\SimpleServer.exe
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\log4net.dll
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\SharpRakLib.dll
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\SharpRakLib.pdb
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\log4net.xml
+D:\GitHub\SharpRakLib\src\SimpleServer\obj\Debug\SimpleServer.csprojResolveAssemblyReference.cache
+D:\GitHub\SharpRakLib\src\SimpleServer\obj\Debug\SimpleServer.exe
+D:\GitHub\SharpRakLib\src\SimpleServer\obj\Debug\SimpleServer.pdb
+D:\GitHub\SharpRakLib\src\SimpleServer\bin\Debug\SimpleServer.pdb
