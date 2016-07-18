@@ -1,0 +1,8 @@
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\bin\Debug\TestingRakLib.exe.config
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\bin\Debug\TestingRakLib.exe
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\bin\Debug\TestingRakLib.pdb
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\bin\Debug\SharpRakLib.dll
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\bin\Debug\SharpRakLib.pdb
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\obj\Debug\TestingRakLib.csprojResolveAssemblyReference.cache
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\obj\Debug\TestingRakLib.exe
+C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\TestingRakLib\obj\Debug\TestingRakLib.pdb

@@ -1,0 +1,253 @@
+2016-07-18 00:56:33,034 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:58:41,938 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:59:02,442 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:59:12,367 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:59:23,569 [7] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:59:28,855 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 00:59:32,936 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:01:28,376 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:01:34,608 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:01:35,615 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:01:36,617 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:01:37,620 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:01:38,603 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:01:39,606 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:19,256 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:02:23,405 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:23,457 [11] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:24,399 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:24,461 [12] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:25,389 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:25,420 [11] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:26,412 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:26,472 [12] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:27,404 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:27,448 [11] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:28,411 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:28,451 [12] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:02:29,410 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41446
+2016-07-18 01:02:29,467 [11] INFO  SimpleServer.Network.NetworkSession - Session Destroyed!
+2016-07-18 01:09:00,821 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:09:15,514 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:16,517 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:17,520 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:18,527 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:19,518 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:20,511 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:09:21,517 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:45800
+2016-07-18 01:10:13,109 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:10:39,677 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:10:50,680 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:11:25,761 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:12:35,357 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:12:45,203 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:12:46,202 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:12:47,195 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:12:48,220 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:12:49,214 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:12:50,209 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36212
+2016-07-18 01:13:51,042 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:14:18,691 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:15:03,071 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:16:45,648 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:17:04,362 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:18:13,770 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:18:27,132 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:19:33,289 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:19:54,563 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:21:52,189 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:21:57,547 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:49061
+2016-07-18 01:22:33,974 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:23:37,445 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:24:09,009 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:24:26,939 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:28:21,798 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:28:46,364 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:28:54,509 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:29:44,976 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:29:58,341 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:30:20,541 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:30:36,008 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:31:05,195 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:31:18,746 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:31:29,497 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:32:20,812 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:32:41,402 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:44153
+2016-07-18 01:33:03,403 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:34:24,299 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:34:38,017 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:35:16,747 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:36:47,571 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:37:01,514 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:38:44,152 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:39:27,147 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:40:04,493 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:40:30,778 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:40:59,519 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:43:15,394 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:48:30,344 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:51:02,794 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:51:37,520 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 01:59:02,410 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:01:35,826 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:03:20,908 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:03:56,584 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:04:39,773 [10] INFO  SimpleServer.SessionManager - Session started for 10.0.1.10:19132
+2016-07-18 02:05:24,157 [10] INFO  SimpleServer.SessionManager - Session started for 10.0.1.10:19132
+2016-07-18 02:05:42,464 [9] INFO  SimpleServer.SessionManager - Session started for 10.0.1.10:19132
+2016-07-18 02:05:42,535 [9] WARN  SimpleServer.Network.NetworkSession - Received packet: SharpRakLib.Protocol.RakNet.EncapsulatedPacket
+2016-07-18 02:05:52,164 [14] INFO  SimpleServer.SessionManager - Session started for 10.0.1.10:19132
+2016-07-18 02:05:52,244 [14] WARN  SimpleServer.Network.NetworkSession - Received packet: SharpRakLib.Protocol.RakNet.EncapsulatedPacket
+2016-07-18 02:05:59,766 [9] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:36270
+2016-07-18 02:05:59,855 [9] WARN  SimpleServer.Network.NetworkSession - Received packet: SharpRakLib.Protocol.RakNet.EncapsulatedPacket
+2016-07-18 02:10:22,142 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:10:25,208 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:10:25,288 [13] WARN  SimpleServer.Network.NetworkSession - PacketId: 173
+2016-07-18 02:11:07,198 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:11:27,457 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:11:27,574 [12] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:11:45,464 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:11:48,008 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:11:48,111 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:12:15,233 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:12:24,157 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:12:24,264 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:12:41,452 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:12:45,140 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:12:45,239 [15] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:13:43,326 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:13:47,442 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:41055
+2016-07-18 02:13:47,560 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:19:43,805 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:19:51,015 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:19:52,015 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:19:52,088 [12] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:20:20,987 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:20:24,494 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:20:24,600 [13] INFO  SimpleServer.Network.NetworkSession - Ping; 9918690101336
+2016-07-18 02:20:24,602 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:21:48,131 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:21:53,916 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:21:54,020 [12] INFO  SimpleServer.Network.NetworkSession - Ping; 144115188080917340
+2016-07-18 02:21:54,021 [12] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:22:04,057 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:22:04,171 [13] INFO  SimpleServer.Network.NetworkSession - Ping; 144115188080917340
+2016-07-18 02:22:04,172 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:22:12,898 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:22:20,092 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:22:20,173 [14] INFO  SimpleServer.Network.NetworkSession - Ping; 9918690101336
+2016-07-18 02:22:20,174 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:24:17,226 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:24:21,502 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:24:21,620 [13] INFO  SimpleServer.Network.NetworkSession - 
+2016-07-18 02:24:21,622 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:24:33,234 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:24:37,222 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:24:38,221 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:24:38,316 [14] INFO  SimpleServer.Network.NetworkSession - 
+2016-07-18 02:24:38,318 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:24:52,350 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:24:58,102 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:24:58,228 [14] INFO  SimpleServer.Network.NetworkSession - 
+2016-07-18 02:24:58,229 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:25:27,797 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:25:33,168 [12] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:25:33,274 [12] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:25:33,275 [12] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:25:55,380 [11] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:26:02,624 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:26:04,894 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46550
+2016-07-18 02:26:05,091 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:26:05,093 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:32:48,784 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:32:52,570 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:32:53,077 [10] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:32:53,208 [10] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:32:53,209 [10] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:33:19,806 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:33:33,672 [15] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:33:33,761 [15] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:33:33,762 [15] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:33:47,370 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:33:52,915 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:33:53,028 [13] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:33:53,029 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:34:17,317 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:34:22,211 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:34:22,298 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:34:22,299 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:34:57,556 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:35:02,162 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:35:02,305 [14] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c4                                               Ä
+
+2016-07-18 02:35:02,306 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:35:02,306 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:35:46,729 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:35:51,969 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:35:52,097 [13] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c4                                               Ä
+
+2016-07-18 02:35:52,099 [13] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:35:52,099 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:36:22,931 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:36:26,716 [15] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:36:26,806 [15] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.UnknownPackage
+2016-07-18 02:36:26,807 [15] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:36:45,162 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:36:48,868 [15] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:36:49,011 [15] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 c5 02 00 00 00 00 4d 3b 5c 58 08 00 60 05 09 00  Å.....M;\X..`...
+00000010 00                                               .
+
+2016-07-18 02:36:49,013 [15] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:36:49,013 [15] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:36:59,578 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:37:04,964 [11] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:46409
+2016-07-18 02:37:05,086 [11] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c5                                               Å
+
+2016-07-18 02:37:05,088 [11] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:37:05,088 [11] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:39:45,030 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:39:51,876 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:35753
+2016-07-18 02:39:52,012 [14] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c8                                               È
+
+2016-07-18 02:39:52,013 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:39:52,016 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:40:20,524 [9] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:40:24,410 [13] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:35753
+2016-07-18 02:40:24,526 [13] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c9                                               É
+
+2016-07-18 02:40:24,528 [13] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:40:24,529 [13] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:40:42,567 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:40:48,811 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:35753
+2016-07-18 02:40:48,933 [14] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c9                                               É
+
+2016-07-18 02:40:48,936 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:41:05,516 [10] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
+2016-07-18 02:41:09,320 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:35753
+2016-07-18 02:41:09,411 [14] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c9                                               É
+
+2016-07-18 02:41:09,412 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:41:09,413 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:41:18,163 [14] INFO  SimpleServer.SessionManager - Session started for 84.107.206.35:35753
+2016-07-18 02:41:18,244 [14] WARN  MiNET.Net.Package - ConnectedPing: Still have 8 bytes to read!!
+00000000 00 00 09 05 60 00 08 58 5c 3b 4d 00 00 00 00 02  ....`..X\;M.....
+00000010 c9                                               É
+
+2016-07-18 02:41:18,245 [14] INFO  SimpleServer.Network.NetworkSession - MiNET.Net.ConnectedPing
+2016-07-18 02:41:18,245 [14] WARN  SimpleServer.Network.NetworkSession - Payload:
+2016-07-18 02:47:06,807 [8] INFO  SimpleServer.SimpleServer - SimpleServer is now running!
