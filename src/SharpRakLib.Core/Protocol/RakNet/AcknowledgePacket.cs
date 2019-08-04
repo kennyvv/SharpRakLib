@@ -9,7 +9,7 @@ namespace SharpRakLib.Protocol.RakNet
 	{
 		public int[] Packets;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			//IBuffer payload = JavaByteBuffer.Allocate(0, false);
 			var ranges = Slize(Packets.ToList());
@@ -80,7 +80,7 @@ namespace SharpRakLib.Protocol.RakNet
 			buffer.Put(payload.ToByteArray());*/
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			int count = buffer.ReadShort();
 			var packets = new List<int>();

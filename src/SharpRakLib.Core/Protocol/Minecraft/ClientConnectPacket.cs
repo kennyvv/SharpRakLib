@@ -8,14 +8,14 @@ namespace SharpRakLib.Protocol.Minecraft
 		public long SendPing;
 		public bool UseSecurity;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteLong(ClientId);
 			buffer.WriteLong(SendPing);
 			buffer.WriteBool(UseSecurity);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			ClientId = buffer.ReadLong();
 			SendPing = buffer.ReadLong();

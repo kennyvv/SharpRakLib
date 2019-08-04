@@ -10,7 +10,7 @@ namespace SharpRakLib.Protocol.Minecraft
 		public long SendPong;
 		public IPEndPoint[] SystemAddresses;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(Address);
 			foreach (var a in SystemAddresses)
@@ -21,7 +21,7 @@ namespace SharpRakLib.Protocol.Minecraft
 			buffer.WriteLong(SendPong);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			Address = buffer.ReadIpEndpoint();
 			SystemAddresses = new IPEndPoint[10];

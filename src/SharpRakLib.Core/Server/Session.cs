@@ -14,7 +14,7 @@ namespace SharpRakLib.Server
 	{
 		private RakNetServer _server;
 		private int _lastPing = -99;
-		public Session(IPEndPoint address, RakNetServer server) : base(address, server)
+		public Session(IPEndPoint address, RakNetServer server) : base(address, server, 0)
 		{
 			_server = server;
 		}

@@ -10,7 +10,7 @@ namespace SharpRakLib.Protocol.RakNet
 		public ushort MtuSize;
 		public long ServerId;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(JRakLibPlus.RaknetMagic);
 			buffer.WriteLong(ServerId);
@@ -19,7 +19,7 @@ namespace SharpRakLib.Protocol.RakNet
 			buffer.WriteByte(0); //security
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			buffer.Seek(16, SeekOrigin.Current); //MAGIC
 			ServerId = buffer.ReadLong();

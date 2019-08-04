@@ -9,7 +9,7 @@ namespace SharpRakLib.Protocol.RakNet
 		public long PingId;
 		public long ServerId;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteLong(PingId);
 			buffer.WriteLong(ServerId);
@@ -17,7 +17,7 @@ namespace SharpRakLib.Protocol.RakNet
 			buffer.WriteFixedString(Identifier);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			PingId = buffer.ReadLong();
 			ServerId = buffer.ReadLong();

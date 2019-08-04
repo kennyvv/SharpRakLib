@@ -8,14 +8,14 @@ namespace SharpRakLib.Protocol.RakNet
 		public int NullPayloadLength;
 		public byte ProtocolVersion;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(JRakLibPlus.RaknetMagic);
 			buffer.WriteByte(ProtocolVersion);
 			//buffer.Write(new byte[NullPayloadLength - 18]);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			buffer.Seek(16, SeekOrigin.Current); //MAGIC
 			ProtocolVersion = (byte) buffer.ReadByte();

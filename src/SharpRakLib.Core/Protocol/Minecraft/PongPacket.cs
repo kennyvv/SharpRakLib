@@ -7,13 +7,13 @@ namespace SharpRakLib.Protocol.Minecraft
 		public long SendPingTime;
 		public long SendPongTime;
 		
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteLong(SendPingTime);
 			buffer.WriteLong(SendPongTime);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			SendPingTime = buffer.ReadLong();
 			SendPongTime = buffer.ReadLong();

@@ -3,7 +3,7 @@ using SharpRakLib.Util;
 
 namespace SharpRakLib.Protocol
 {
-	public abstract class RakNetPacket
+	public abstract class RakNetPacket : IPacket<BedrockStream>
 	{
 		/**
 		* The time this packet was last sent at. This is used internally by JRakLibPlus, and
@@ -22,7 +22,7 @@ namespace SharpRakLib.Protocol
 			//IBuffer b = JavaByteBuffer.Allocate(GetSize(), false);
 			using (MemoryStream ms = new MemoryStream())
 			{
-				using (MinecraftStream stream = new MinecraftStream(ms))
+				using (BedrockStream stream = new BedrockStream(ms))
 				{
 					stream.WriteByte(GetPid());
 					_encode(stream);
@@ -41,16 +41,16 @@ namespace SharpRakLib.Protocol
 		{
 			Raw = bytes;
 			//IBuffer b = JavaByteBuffer.Wrap(bytes, false);
-			using (MinecraftStream stream = new MinecraftStream(new MemoryStream(bytes)))
+			using (BedrockStream stream = new BedrockStream(new MemoryStream(bytes)))
 			{
 				stream.ReadByte();// b.GetByte();
 				_decode(stream);
 			}
 		}
 
-		public abstract void _encode(MinecraftStream buffer);
+		public abstract void _encode(BedrockStream buffer);
 
-		public abstract void _decode(MinecraftStream buffer);
+		public abstract void _decode(BedrockStream buffer);
 
 		/**
 		 * Get this packet's PacketID. The PacketID is always the first byte of the packet.
@@ -63,5 +63,16 @@ namespace SharpRakLib.Protocol
 		 * @return The size for the packet (in bytes). The default is zero
 		 */
 		public abstract int GetSize();
+		
+		public void Encode(BedrockStream stream)
+		{
+			stream.WriteByte(GetPid());
+			_encode(stream);
+		}
+
+		public void Decode(BedrockStream stream)
+		{
+			_decode(stream);
+		}
 	}
 }

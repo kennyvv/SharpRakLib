@@ -22,7 +22,7 @@ namespace SharpRakLib.Protocol.RakNet
 		public int SplitId = -1;
 		public int SplitIndex = -1;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteByte((byte) (((byte) Reliability << 5) | (Split ? 0x00010000 : 0)));
 
@@ -51,7 +51,7 @@ namespace SharpRakLib.Protocol.RakNet
 			buffer.Write(Payload);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			//Header
 			var flags = buffer.ReadByte();

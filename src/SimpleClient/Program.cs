@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Threading;
+using log4net;
+using log4net.Config;
 using SharpRakLib.Core.Client;
 using SharpRakLib.Protocol.RakNet;
 
@@ -11,25 +15,18 @@ namespace SimpleClient
     {
         static void Main(string[] args)
         {
-            RakNetClient client = new RakNetClient(new IPEndPoint(IPAddress.Loopback, 19132));
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+            
+            ThreadedRaknetClient client = new ThreadedRaknetClient(new IPEndPoint(IPAddress.Loopback, 19132));
+            client.Start();
             
             Console.WriteLine("Started!");
-            Thread clientThread = new Thread(() =>
-            {
-                client.Start();
-            });
-            
-            clientThread.Start();
-            
-            while (!client.IsConnected)
-            {
-                UnconnectedPingOpenConnectionsPacket packet = new UnconnectedPingOpenConnectionsPacket();
-                packet.PingId = Stopwatch.GetTimestamp();
-                
-                client.Session.SendPacket(packet);
-                
-                Thread.Sleep(500);
-            }
+
+            var session = client.WaitForSession();
+
+            Console.WriteLine($"Session established!");
+            Console.ReadLine();
             
             Console.WriteLine($"Finished!");
         }

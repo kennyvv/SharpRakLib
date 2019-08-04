@@ -8,13 +8,13 @@ namespace SharpRakLib.Protocol.RakNet
 		public List<EncapsulatedPacket> Packets = new List<EncapsulatedPacket>();
 		public int SequenceNumber;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteLTriad(SequenceNumber);
 			Packets.ForEach(packet => packet._encode(buffer));
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			SequenceNumber = buffer.ReadLTriad();
 			while (buffer.Length - buffer.Position >= 4)

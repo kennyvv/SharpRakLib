@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Threading;
+using log4net;
 using SharpRakLib.Protocol;
+using SharpRakLib.Protocol.Minecraft;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
 using SharpRakLib.Util;
@@ -14,6 +18,8 @@ namespace SharpRakLib.Core.Client
 {
     public class RakNetClient : ISessionManager
     {
+        private static ILog Log = LogManager.GetLogger(typeof(RakNetClient));
+        
         private UdpClient UdpClient { get; set; }
         private readonly Dictionary<TaskInfo, Action> _tasks = new Dictionary<TaskInfo, Action>();
         private readonly Queue<DatagramPacket> _sendQueue = new Queue<DatagramPacket>();
@@ -31,13 +37,14 @@ namespace SharpRakLib.Core.Client
         public IPEndPoint BindAddress { get; }
         public HookManager HookManager { get; }
         
-        public bool IsConnected { get; private set; } = false;
         private IPEndPoint ServerEndpoint { get; set; }
         public IPEndPoint ClientEndpoint { get; private set; }
         
-        public SessionBase Session { get; private set; }
+        private ClientSession Session { get; set; }
         public RakNetClient(IPEndPoint endpoint)
         {
+            
+            Session = new ClientSession(this, endpoint, this, 1192);
             ClientEndpoint = new IPEndPoint(IPAddress.Any, 0);
             ServerEndpoint = endpoint;
             
@@ -48,13 +55,16 @@ namespace SharpRakLib.Core.Client
 
             AddTask(0, HandlePackets);
             //AddTask(0, CheckBlacklist);
-            Session = new SessionBase(endpoint, this);
         }
         
         public void Start()
         {
+            if (Running) 
+                return;
+            
             Running = true;
             Stopped = false;
+
             Run();
         }
 
@@ -153,7 +163,7 @@ namespace SharpRakLib.Core.Client
             }
 
 
-            //	Console.WriteLine("Received: " + receiveBytes.Length);
+            //	Log.Info("Received: " + receiveBytes.Length);
             if (receiveBytes.Length != 0)
             {
                 listener.BeginReceive(RequestCallback, listener);				
@@ -165,10 +175,9 @@ namespace SharpRakLib.Core.Client
         protected virtual void Run()
         {
             //this.logger.info("Server starting...");
-            Console.WriteLine("Starting client...");
             if (Bind())
             {
-                Console.WriteLine("RakNetClient bound to " + ClientEndpoint + ", running on RakNet protocol " +
+                Log.Info("RakNetClient bound to " + ClientEndpoint + ", running on RakNet protocol " +
                                   JRakLibPlus.RaknetProtocol);
                 //this.logger.info("RakNetServer bound to " + bindAddress + ", running on RakNet protocol " + JRakLibPlus.RAKNET_PROTOCOL);
                 try
@@ -181,7 +190,7 @@ namespace SharpRakLib.Core.Client
                         if (elapsed >= 50)
                         {
                             if (WarnOnCantKeepUp)
-                                Console.WriteLine("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
+                                Log.Info("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
                             //this.logger.warn("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
                         }
                         else
@@ -217,7 +226,7 @@ namespace SharpRakLib.Core.Client
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Exception: " + ex);
+                        Log.Info("Exception: " + ex);
                     }
                     remove.Add(ti);
                 }
@@ -261,68 +270,52 @@ namespace SharpRakLib.Core.Client
             }
             AddTask(0, HandlePackets); //Run next tick
         }
+
+        internal void SendData(byte[] data, IPEndPoint target)
+        {
+            UdpClient.Send(data, data.Length, target);
+        }
+
+        private ManualResetEvent _resetEvent = new ManualResetEvent(false);
+        public ClientSession WaitForSession()
+        {
+            while (!Session.IsConnected)
+            {
+                Log.Info($"No session...");
+                //while (!client.IsConnected)
+                {
+                    ConnectedPingOpenConnectionsPacket packet = new ConnectedPingOpenConnectionsPacket();
+                    packet.PingId = Stopwatch.GetTimestamp();
+                    packet.Guid = new Random().Next();
+
+                    var data = packet.Encode();
+                    
+                    if (ServerEndpoint != null)
+                    {
+                        SendData(data, ServerEndpoint);
+                    }
+                    else
+                    {
+                        SendData(data, new IPEndPoint(IPAddress.Broadcast, 19132));
+                    }
+                    
+                    //Session.SendPacket(packet);
+                
+                    Thread.Sleep(500);
+                }
+            }
+
+            Log.Info($"Got session!");
+            return Session;
+        }
         
-        private readonly Dictionary<string, SessionBase> _sessions = new Dictionary<string, SessionBase>();
         private void HandlePacket(DatagramPacket packet)
         {
-            var remote = packet.Endpoint;
-            
-            switch (packet.GetData()[0])
-            {
-                //Check for pings
-                case JRakLibPlus.IdUnconnectedPongOpenConnections:
-                    UnconnectedPongOpenConnectionsPacket p = new UnconnectedPongOpenConnectionsPacket();
-                    p.Decode(packet.GetData());
-                    
-                    OnUnconnectedPong(p, remote);
-                    break;
-                case JRakLibPlus.IdOpenConnectionReply1:
-                    break;
-                case JRakLibPlus.IdOpenConnectionReply2:
-                    break;
-                default:
-                    lock (_sessions)
-                    {
-                        SessionBase session;
-                        if (!_sessions.ContainsKey("/" + remote))
-                        {
-                            session = new SessionBase(remote, this);
-                            _sessions.Add("/" + session.Address, session);
-                            //	this.logger.debug("Session opened from " + packet.getAddress().toString());
-
-                            HookManager.ActivateHook(HookManager.Hook.SessionOpened, session);
-                        }
-                        else
-                        {
-                            session = _sessions["/" + remote];
-                        }
-
-                        session.ProcessPacket(packet.GetData());
-                    }
-                    break;
-            }
+            Session.ProcessPacket(packet.GetData());
         }
-        
-        protected virtual void OnUnconnectedPong(UnconnectedPongOpenConnectionsPacket packet, IPEndPoint senderEndpoint)
-        {
-            if (!IsConnected)
-            {
-                ServerEndpoint = senderEndpoint;
-                IsConnected = true;
-              //  SendOpenConnectionRequest1();
-            }
-        }
-        
-        private void OnOpenConnectionReply2(OpenConnectionReply2Packet message)
-        {
-           // Log.Warn("MTU Size: " + message.mtuSize);
-         //   Log.Warn("Client Endpoint: " + message.clientEndpoint);
 
-            //_serverEndpoint = message.clientEndpoint;
+        private bool UseSecurity { get; set; }
 
-           // _mtuSize = message.mtuSize;
-          //  SendConnectionRequest();
-        }
 
         public void AddPacketToQueue(RakNetPacket packet, IPEndPoint address)
         {

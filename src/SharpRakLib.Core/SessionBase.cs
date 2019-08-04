@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using log4net;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
@@ -10,6 +11,8 @@ namespace SharpRakLib.Core
 {
     public class SessionBase
     {
+        private static ILog Log = LogManager.GetLogger(typeof(SessionBase));
+        
         public const int Disconnected = 0;
         public const int Connecting1 = 1;
         public const int Connecting2 = 2;
@@ -41,11 +44,12 @@ namespace SharpRakLib.Core
         
         public IPEndPoint Address { get; }
         protected ISessionManager SessionManager { get; }
-        public SessionBase(IPEndPoint address, ISessionManager manager)
+        public SessionBase(IPEndPoint address, ISessionManager manager, short mtu)
         {
             this.Address = address;
             _state = Connecting1;
             SessionManager = manager;
+            _mtu = mtu;
             
             SessionManager.AddTask(0, Update);
         }
@@ -111,14 +115,14 @@ namespace SharpRakLib.Core
         
         public void SendPacket(RakNetPacket packet)
         {
-            Console.WriteLine($"Sending: {packet.ToString()} | MTU: {_mtu}");
+            Log.Info($"Sending: {packet.ToString()} | MTU: {_mtu}");
 			
             SessionManager.AddPacketToQueue(packet, Address);
         }
         
         protected void AddToQueue(EncapsulatedPacket pkt, bool immediate)
         {
-            Console.WriteLine($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu}");
+            Log.Info($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu}");
             if (immediate)
             {
                 CustomPacket cp = new CustomPackets.CustomPacket0();
@@ -147,11 +151,12 @@ namespace SharpRakLib.Core
         {
             if (_state == Disconnected) return;
             _timeLastPacketReceived = JavaHelper.CurrentTimeMillis();
-
+            HandlePacket(data);
+            return;
+            
             switch (data[0])
             {
                 // ACK/NACK
-
                 case JRakLibPlus.Ack:
                     if (_state != Connected || _state == Handshaking) break;
                     var ack = new AckPacket();
@@ -244,6 +249,15 @@ namespace SharpRakLib.Core
             
             if (!HandleEncapsulated(pk))
             {
+                //pk.Payload
+                Log.Warn($"Payload:");
+                foreach (var i in pk.Payload)
+                {
+                    Console.Write(i.ToString("x2") + " ");
+                }
+                Console.WriteLine();
+                Console.WriteLine();
+                
                 SessionManager.HookManager.ActivateHook(HookManager.Hook.PacketRecieved, this, pk);
             }
         }

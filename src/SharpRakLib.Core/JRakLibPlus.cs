@@ -44,7 +44,7 @@ namespace SharpRakLib
 		public const byte McDisconnectNotification = 0x15;
 		public static string LibraryVersion = "1.0-SNAPSHOT";
 
-		public static int RaknetProtocol = 7;
+		public static int RaknetProtocol = 9;
 
 		public static byte[] RaknetMagic =
 		{

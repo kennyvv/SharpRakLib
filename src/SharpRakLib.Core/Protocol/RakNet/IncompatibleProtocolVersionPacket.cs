@@ -7,14 +7,14 @@ namespace SharpRakLib.Protocol.RakNet
 		public byte ProtocolVersion;
 		public long ServerId;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteByte(ProtocolVersion);
 			buffer.Write(JRakLibPlus.RaknetMagic);
 			buffer.WriteLong(ServerId);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			ProtocolVersion = (byte) buffer.ReadByte();
 			buffer.Position += 16;//.Skip(16); //MAGIC

@@ -6,12 +6,12 @@ namespace SharpRakLib.Protocol.Minecraft
 	{
 		public long PingId;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.WriteLong(PingId);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			PingId = buffer.ReadLong();
 		}

@@ -4,11 +4,11 @@ namespace SharpRakLib.Protocol.Minecraft
 {
 	public class DisconnectNotificationPacket : RakNetPacket
 	{
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 		}
 

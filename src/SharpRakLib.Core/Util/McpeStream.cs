@@ -9,20 +9,17 @@ using System.Threading;
 
 namespace SharpRakLib.Util
 {
-    public class MinecraftStream : Stream
+    public class BedrockStream : Stream
 	{
-		//private byte[] Key { get; set; }
-		//private bool EncryptionInitiated { get; set; } = false;
-
 		private CancellationTokenSource CancelationToken { get; }
 		public Stream BaseStream { get; private set; }
-		public MinecraftStream(Stream baseStream)
+		public BedrockStream(Stream baseStream)
 		{
 			BaseStream = baseStream;
 			CancelationToken = new CancellationTokenSource();
 		}
 
-		public MinecraftStream() : this(new MemoryStream())
+		public BedrockStream() : this(new MemoryStream())
 		{
 			
 		}
@@ -314,72 +311,6 @@ namespace SharpRakLib.Util
         {
 	        return (ReadByte() & 0xFF) | ((ReadByte() & 0xFF) << 8) | ((ReadByte() & 0x0F) << 16);
         }
-        
-		/*public SlotData ReadSlot()
-		{
-			bool present = ReadBool();
-			if (!present) return null;
-
-			int id = ReadVarInt();
-			byte count = 0;
-			short damage = 0;
-			NbtCompound nbt = null;
-
-			
-				count = (byte)ReadByte();
-			//	damage = ReadShort();
-				nbt = ReadNbtCompound();
-			
-
-			SlotData slot = new SlotData();
-			slot.Count = count;
-			slot.Nbt = nbt;
-			slot.ItemID = id;
-			slot.ItemDamage = damage;
-
-			return slot;
-		}*/
-
-		/*private double NetworkToHostOrder(byte[] data)
-		{
-			if (BitConverter.IsLittleEndian)
-			{
-				Array.Reverse(data);
-			}
-			return BitConverter.ToDouble(data, 0);
-		}
-
-		private float NetworkToHostOrder(float network)
-		{
-			var bytes = BitConverter.GetBytes(network);
-
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(bytes);
-
-			return BitConverter.ToSingle(bytes, 0);
-		}
-
-		private ushort[] NetworkToHostOrder(ushort[] network)
-		{
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(network);
-			return network;
-		}
-
-		private ushort NetworkToHostOrder(ushort network)
-		{
-			var net = BitConverter.GetBytes(network);
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(net);
-			return BitConverter.ToUInt16(net, 0);
-		}
-		private ulong NetworkToHostOrder(ulong network)
-		{
-			var net = BitConverter.GetBytes(network);
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(net);
-			return BitConverter.ToUInt64(net, 0);
-		}*/
 
         #endregion
 
@@ -411,17 +342,6 @@ namespace SharpRakLib.Util
 		        }
 		        WriteBEShort((short) endPoint.Port);
 	        }
-	        
-	       /* if (endPoint.AddressFamily != AddressFamily.InterNetwork)
-	        {
-		        throw new Exception("Can't put IPv" + endPoint.AddressFamily + ": not implemented");
-	        }
-	        WriteByte((byte) (endPoint.AddressFamily == AddressFamily.InterNetwork ? 4 : 6));
-	        foreach (var part in endPoint.Address.ToString().Split('.'))
-	        {
-		        WriteByte((byte) ((byte) ~int.Parse(part) & 0xFF));
-	        }
-	        WriteUShort((ushort) endPoint.Port);*/
         }
         
 		public void WritePosition(Vector3 position)
@@ -573,37 +493,6 @@ namespace SharpRakLib.Util
 			return new Guid(long1.Concat(long2).ToArray());
 		}
 
-
-		/*private byte[] HostToNetworkOrder(double d)
-		{
-			var data = BitConverter.GetBytes(d);
-
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(data);
-
-			return data;
-		}
-
-		private byte[] HostToNetworkOrder(float host)
-		{
-			var bytes = BitConverter.GetBytes(host);
-
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(bytes);
-
-			return bytes;
-		}
-
-		private byte[] HostToNetworkOrderLong(ulong host)
-		{
-			var bytes = BitConverter.GetBytes(host);
-
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(bytes);
-
-			return bytes;
-		}
-*/
         #endregion
 
         private object _disposeLock = new object();

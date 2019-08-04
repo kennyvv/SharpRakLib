@@ -24,7 +24,7 @@ namespace SharpRakLib.Protocol.Minecraft
 			new SystemAddress("0.0.0.0", 0, 4)
 		};
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(Address);
 			buffer.WriteShort(0);
@@ -36,7 +36,7 @@ namespace SharpRakLib.Protocol.Minecraft
 			buffer.WriteLong(SendPong);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			buffer.ReadIpEndpoint();
 			buffer.Position += 2; //short

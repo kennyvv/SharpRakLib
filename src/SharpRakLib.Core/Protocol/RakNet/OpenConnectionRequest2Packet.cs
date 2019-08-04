@@ -11,7 +11,7 @@ namespace SharpRakLib.Protocol.RakNet
 		public short MtuSize;
 		public IPEndPoint ServerAddress;
 
-		public override void _encode(MinecraftStream buffer)
+		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(JRakLibPlus.RaknetMagic);
 			buffer.Write(ServerAddress);
@@ -19,7 +19,7 @@ namespace SharpRakLib.Protocol.RakNet
 			buffer.WriteLong(ClientId);
 		}
 
-		public override void _decode(MinecraftStream buffer)
+		public override void _decode(BedrockStream buffer)
 		{
 			buffer.Seek(16, SeekOrigin.Current); //MAGIC
 			ServerAddress = buffer.ReadIpEndpoint();
