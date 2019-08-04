@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using log4net;
+using SharpRakLib.Core;
 using SharpRakLib.Server;
 using SimpleServer.Network;
 
@@ -20,7 +21,7 @@ namespace SimpleServer
 			get { return Sessions.Count; }
 		}
 
-		public void CreateSession(Session session)
+		public void CreateSession(SessionBase session)
 		{
 			if (!Sessions.TryAdd(session.Address, new NetworkSession(session)))
 			{
@@ -32,7 +33,7 @@ namespace SimpleServer
 			}
 		}
 
-		public void DestroySession(Session session)
+		public void DestroySession(SessionBase session)
 		{
 			NetworkSession outSession;
 			if (!Sessions.TryRemove(session.Address, out outSession))
@@ -42,7 +43,7 @@ namespace SimpleServer
 			outSession.Destroy();
 		}
 
-		public NetworkSession GetSession(Session session)
+		public NetworkSession GetSession(SessionBase session)
 		{
 			NetworkSession netSession;
 			if (!Sessions.TryGetValue(session.Address, out netSession))

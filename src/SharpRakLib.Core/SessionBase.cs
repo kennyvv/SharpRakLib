@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
 
@@ -7,17 +10,24 @@ namespace SharpRakLib.Core
 {
     public class SessionBase
     {
-        private readonly List<int> _ackQueue = new List<int>();
-        private long _clientId;
+        public const int Disconnected = 0;
+        public const int Connecting1 = 1;
+        public const int Connecting2 = 2;
+        public const int Handshaking = 3;
+        public const int Connected = 4;
 
-        private int _lastPing = -99;
+        public const int MaxSplitSize = 128;
+        public const int MaxSplitCount = 4;
+        
+        private readonly List<int> _ackQueue = new List<int>();
+        protected long _clientId;
 
         private int _lastSeqNum = -1;
 
         private int _messageIndex;
-        private short _mtu;
+        protected short _mtu;
         private readonly List<int> _nackQueue = new List<int>();
-        private readonly Dictionary<int, CustomPacket> _recoveryQueue = new Dictionary<int, CustomPacket>();
+        protected readonly Dictionary<int, CustomPacket> _recoveryQueue = new Dictionary<int, CustomPacket>();
 
         private readonly CustomPacket _sendQueue = new CustomPackets.CustomPacket4();
         private int _sendSeqNum;
@@ -26,21 +36,29 @@ namespace SharpRakLib.Core
         private readonly Dictionary<int, Dictionary<int, EncapsulatedPacket>> _splitQueue =
             new Dictionary<int, Dictionary<int, EncapsulatedPacket>>();
 
-        private int _state;
+        protected int _state;
         private long _timeLastPacketReceived;
         
         public IPEndPoint Address { get; }
-
-        public SessionBase()
+        protected ISessionManager SessionManager { get; }
+        public SessionBase(IPEndPoint address, ISessionManager manager)
         {
-            _state = Session.Connecting1;
-            this._server.AddTask(0, Update);
+            this.Address = address;
+            _state = Connecting1;
+            SessionManager = manager;
+            
+            SessionManager.AddTask(0, Update);
+        }
+
+        public virtual void Disconnect(string reason)
+        {
+            
         }
         
         private void Update()
         {
             if (_state == Disconnected) return;
-            if (JavaHelper.CurrentTimeMillis() - _timeLastPacketReceived >= _server.PacketTimeout)
+            if (JavaHelper.CurrentTimeMillis() - _timeLastPacketReceived >= SessionManager.PacketTimeout)
             {
                 Disconnect("timeout");
             }
@@ -69,7 +87,7 @@ namespace SharpRakLib.Core
 
                 SendQueuedPackets();
 
-                _server.AddTask(0, Update);
+                SessionManager.AddTask(0, Update);
             }
         }
         
@@ -87,6 +105,196 @@ namespace SharpRakLib.Core
                     }
 
                     _sendQueue.Packets.Clear();
+                }
+            }
+        }
+        
+        public void SendPacket(RakNetPacket packet)
+        {
+            Console.WriteLine($"Sending: {packet.ToString()} | MTU: {_mtu}");
+			
+            SessionManager.AddPacketToQueue(packet, Address);
+        }
+        
+        protected void AddToQueue(EncapsulatedPacket pkt, bool immediate)
+        {
+            Console.WriteLine($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu}");
+            if (immediate)
+            {
+                CustomPacket cp = new CustomPackets.CustomPacket0();
+                cp.Packets.Add(pkt);
+                cp.SequenceNumber = _sendSeqNum++;
+                SendPacket(cp);
+                lock (_recoveryQueue)
+                {
+                    _recoveryQueue.Add(cp.SequenceNumber, cp);
+                }
+            }
+            else
+            {
+                if (_sendQueue.GetSize() + pkt.GetSize() > _mtu)
+                {
+                    SendQueuedPackets();
+                }
+                lock (_sendQueue)
+                {
+                    _sendQueue.Packets.Add(pkt);
+                }
+            }
+        }
+
+        public void ProcessPacket(byte[] data)
+        {
+            if (_state == Disconnected) return;
+            _timeLastPacketReceived = JavaHelper.CurrentTimeMillis();
+
+            switch (data[0])
+            {
+                // ACK/NACK
+
+                case JRakLibPlus.Ack:
+                    if (_state != Connected || _state == Handshaking) break;
+                    var ack = new AckPacket();
+                    ack.Decode(data);
+
+                    lock (_recoveryQueue)
+                    {
+                        foreach (var seq in ack.Packets)
+                        {
+                            if (_recoveryQueue.ContainsKey(seq))
+                            {
+                                _recoveryQueue.Remove(seq);
+                            }
+                        }
+                    }
+
+                    break;
+                case JRakLibPlus.Nack:
+                    if (_state != Connected || _state == Handshaking) break;
+                    var nack = new NackPacket();
+                    nack.Decode(data);
+
+                    lock (_recoveryQueue)
+                    {
+                        foreach (var seq in nack.Packets)
+                        {
+                            if (_recoveryQueue.ContainsKey(seq))
+                            {
+                                var pk = _recoveryQueue[seq];
+                                pk.SequenceNumber = _sendSeqNum++;
+                                SendPacket(pk);
+                                _recoveryQueue.Remove(seq);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    HandlePacket(data);
+                    break;
+            }
+        }
+        
+        protected virtual void HandlePacket(byte[] data)
+        {
+            
+        }
+        
+        protected void HandleDataPacket(byte[] data)
+        {
+            CustomPacket pk = new CustomPackets.CustomPacket0();
+            pk.Decode(data);
+
+            var diff = pk.SequenceNumber - _lastSeqNum;
+            lock (_nackQueue)
+            {
+                if (_nackQueue.Count != 0)
+                {
+                    _nackQueue.Remove(pk.SequenceNumber);
+                    if (diff != 1)
+                    {
+                        for (var i = _lastSeqNum + 1; i < pk.SequenceNumber; i++)
+                        {
+                            _nackQueue.Add(i);
+                        }
+                    }
+                }
+            }
+            lock (_ackQueue)
+            {
+                _ackQueue.Add(pk.SequenceNumber);
+            }
+
+            if (diff >= 1)
+            {
+                _lastSeqNum = pk.SequenceNumber;
+            }
+
+            pk.Packets.ForEach(HandleEncapsulatedPacket);
+        }
+
+        private void HandleEncapsulatedPacket(EncapsulatedPacket pk)
+        {
+            if (!(_state == Connected || _state == Handshaking))
+                return;
+            
+            if (pk.Split && _state == Connected)
+            {
+                HandleSplitPacket(pk);
+            }
+            
+            if (!HandleEncapsulated(pk))
+            {
+                SessionManager.HookManager.ActivateHook(HookManager.Hook.PacketRecieved, this, pk);
+            }
+        }
+
+        protected virtual bool HandleEncapsulated(EncapsulatedPacket packet)
+        {
+            return false;
+        }
+
+        private void HandleSplitPacket(EncapsulatedPacket pk)
+        {
+            if (pk.SplitCount >= MaxSplitSize || pk.SplitIndex >= MaxSplitSize || pk.SplitIndex < 0)
+            {
+                return;
+            }
+
+            lock (_splitQueue)
+            {
+                if (!_splitQueue.ContainsKey(pk.SplitId))
+                {
+                    if (_splitQueue.Count >= MaxSplitCount)
+                        return; //Too many split packets in the queue will increase memory usage
+                    var m = new Dictionary<int, EncapsulatedPacket>();
+                    m.Add(pk.SplitIndex, pk);
+                    _splitQueue.Add(pk.SplitId, m);
+                }
+                else
+                {
+                    var m = _splitQueue[pk.SplitId];
+                    m.Add(pk.SplitIndex, pk);
+                    _splitQueue.Add(pk.SplitId, m);
+                }
+
+                if (_splitQueue[pk.SplitId].Count == pk.SplitCount)
+                {
+                    var ep = new EncapsulatedPacket();
+					
+                    var packets = _splitQueue[pk.SplitId];
+					
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        for (var i = 0; i < pk.SplitCount; i++)
+                        {
+                            stream.Write(packets[i].Payload);
+                        }
+
+                        ep.Payload = stream.ToArray();
+                    }
+                    _splitQueue.Remove(pk.SplitId);
+
+                    HandleEncapsulatedPacket(ep);
                 }
             }
         }

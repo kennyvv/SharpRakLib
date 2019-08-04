@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SharpRakLib.Core;
 
 namespace SharpRakLib.Server
 {
@@ -13,14 +14,14 @@ namespace SharpRakLib.Server
 
 		private readonly Dictionary<Hook, IHookRunnable> _hooks = new Dictionary<Hook, IHookRunnable>();
 
-		public HookManager(RakNetServer server)
+		public HookManager(ISessionManager server)
 		{
 			this.Server = server;
 		}
 
-		public RakNetServer Server { get; private set; }
+		public ISessionManager Server { get; private set; }
 
-		internal void ActivateHook(Hook hook, Session session, params object[] param)
+		internal void ActivateHook(Hook hook, SessionBase session, params object[] param)
 		{
 			lock (_hooks)
 			{
@@ -48,7 +49,7 @@ namespace SharpRakLib.Server
 
 		public interface IHookRunnable
 		{
-			void OnHook(Session session, params object[] param);
+			void OnHook(SessionBase session, params object[] param);
 		}
 	}
 }

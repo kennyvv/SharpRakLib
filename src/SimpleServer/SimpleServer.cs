@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using SharpRakLib;
+using SharpRakLib.Core;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
 using SimpleServer.Network;
@@ -90,7 +91,7 @@ namespace SimpleServer
 			Server = null;
 		}
 
-		protected void OnPacket(Session session, EncapsulatedPacket packet)
+		protected void OnPacket(SessionBase session, EncapsulatedPacket packet)
 		{
 			NetworkSession netSession = SessionManager.GetSession(session);
 			if (netSession != null)
@@ -107,7 +108,7 @@ namespace SimpleServer
 				Server = server;
 			}
 
-			public void OnHook(Session session, params object[] param)
+			public void OnHook(SessionBase session, params object[] param)
 			{
 				if (Server.SessionManager.SessionCount >= Server.MotdProvider.MaxPlayers)
 				{
@@ -127,7 +128,7 @@ namespace SimpleServer
 				Server = server;
 			}
 
-			public void OnHook(Session session, params object[] param)
+			public void OnHook(SessionBase session, params object[] param)
 			{
 				Server.SessionManager.DestroySession(session);
 			}
@@ -141,7 +142,7 @@ namespace SimpleServer
 				Server = server;
 			}
 
-			public void OnHook(Session session, params object[] param)
+			public void OnHook(SessionBase session, params object[] param)
 			{
 				Server.OnPacket(session, (EncapsulatedPacket) param[0]);
 			}

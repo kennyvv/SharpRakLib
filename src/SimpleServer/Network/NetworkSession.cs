@@ -1,5 +1,6 @@
 ﻿using System;
 using log4net;
+using SharpRakLib.Core;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
 
@@ -8,8 +9,8 @@ namespace SimpleServer.Network
 	public class NetworkSession
 	{
 		private ILog Log = LogManager.GetLogger(typeof(NetworkSession));
-		private Session Session { get; }
-		public NetworkSession(Session baseSession)
+		private SessionBase Session { get; }
+		public NetworkSession(SessionBase baseSession)
 		{
 			Session = baseSession;
 		}

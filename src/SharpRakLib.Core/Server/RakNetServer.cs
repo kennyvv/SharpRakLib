@@ -6,13 +6,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using SharpRakLib.Core;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Util;
 
 namespace SharpRakLib.Server
 {
-	public class RakNetServer
+	public class RakNetServer : ISessionManager
 	{
 		private readonly Dictionary<string, long[]> _blacklist = new Dictionary<string, long[]>();
 		private bool _disconnectInvalidProtocols;
@@ -57,15 +58,15 @@ namespace SharpRakLib.Server
 			});
 		}
 
-		public bool Running { get; private set; }
-		public bool Stopped { get; private set; } = true;
+		public bool Running { get; set; }
+		public bool Stopped { get; set; } = true;
 		//private Logger logger;
 		public string BroadcastName { get; set; }
-		public int MaxPacketsPerTick { get; private set; }
+		public int MaxPacketsPerTick { get; set; }
 		public int ReceiveBufferSize { get; }
 		public int SendBufferSize { get; }
-		public int PacketTimeout { get; private set; }
-		public bool PortChecking { get; private set; }
+		public int PacketTimeout { get; set; }
+		public bool PortChecking { get; set; }
 		public long ServerId { get; }
 		public bool WarnOnCantKeepUp { get; }
 
@@ -350,7 +351,7 @@ namespace SharpRakLib.Server
 							session = _sessions["/" + remote];
 						}
 
-						session.HandlePacket(packet.GetData());
+						session.ProcessPacket(packet.GetData());
 					}
 					break;
 			}

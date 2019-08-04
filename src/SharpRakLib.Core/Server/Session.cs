@@ -10,114 +10,16 @@ using SharpRakLib.Util;
 
 namespace SharpRakLib.Server
 {
-	public class Session
+	public class Session : SessionBase
 	{
-		public const int Disconnected = 0;
-		public const int Connecting1 = 1;
-		public const int Connecting2 = 2;
-		public const int Handshaking = 3;
-		public const int Connected = 4;
-
-		public const int MaxSplitSize = 128;
-		public const int MaxSplitCount = 4;
-		private readonly List<int> _ackQueue = new List<int>();
-		private long _clientId;
-
+		private RakNetServer _server;
 		private int _lastPing = -99;
-
-		private int _lastSeqNum = -1;
-
-		private int _messageIndex;
-		private short _mtu;
-		private readonly List<int> _nackQueue = new List<int>();
-		private readonly Dictionary<int, CustomPacket> _recoveryQueue = new Dictionary<int, CustomPacket>();
-
-		private readonly CustomPacket _sendQueue = new CustomPackets.CustomPacket4();
-		private int _sendSeqNum;
-
-		private readonly RakNetServer _server;
-		private int _splitId;
-
-		private readonly Dictionary<int, Dictionary<int, EncapsulatedPacket>> _splitQueue =
-			new Dictionary<int, Dictionary<int, EncapsulatedPacket>>();
-
-		private int _state;
-		private long _timeLastPacketReceived;
-
-		public Session(IPEndPoint address, RakNetServer server)
+		public Session(IPEndPoint address, RakNetServer server) : base(address, server)
 		{
-			this.Address = address;
-			this._server = server;
-
-			_state = Connecting1;
-
-			this._server.AddTask(0, Update);
+			_server = server;
 		}
 
-		public IPEndPoint Address { get; }
-
-		private void Update()
-		{
-			if (_state == Disconnected) return;
-			if (JavaHelper.CurrentTimeMillis() - _timeLastPacketReceived >= _server.PacketTimeout)
-			{
-				Disconnect("timeout");
-			}
-			else
-			{
-				lock (_ackQueue)
-				{
-					if (_ackQueue.Count != 0)
-					{
-						var ack = new AckPacket();
-						ack.Packets = _ackQueue.ToArray();
-						SendPacket(ack);
-						_ackQueue.Clear();
-					}
-				}
-				lock (_nackQueue)
-				{
-					if (_nackQueue.Count != 0)
-					{
-						var nack = new NackPacket();
-						nack.Packets = _nackQueue.ToArray();
-						SendPacket(nack);
-						_nackQueue.Clear();
-					}
-				}
-
-				SendQueuedPackets();
-
-				_server.AddTask(0, Update);
-			}
-		}
-
-		private void SendQueuedPackets()
-		{
-			lock (_sendQueue)
-			{
-				if (_sendQueue.Packets.Count != 0)
-				{
-					_sendQueue.SequenceNumber = _sendSeqNum++;
-					SendPacket(_sendQueue);
-					lock (_recoveryQueue)
-					{
-						_recoveryQueue.Add(_sendQueue.SequenceNumber, _sendQueue);
-					}
-
-					_sendQueue.Packets.Clear();
-				}
-			}
-		}
-
-		public void SendPacket(RakNetPacket packet)
-		{
-			Console.WriteLine($"Sending: {packet.ToString()} | MTU: {_mtu}");
-			
-			_server.AddPacketToQueue(packet, Address);
-		}
-
-		public void AddPacketToQueue(EncapsulatedPacket pkt, bool immediate)
+		/*public void AddPacketToQueue(EncapsulatedPacket pkt, bool immediate)
 		{
 			switch (pkt.Reliability)
 			{
@@ -167,40 +69,12 @@ namespace SharpRakLib.Server
 			{
 				AddToQueue(pkt, immediate);
 			}
-		}
+		}*/
 
-		private void AddToQueue(EncapsulatedPacket pkt, bool immediate)
-		{
-			Console.WriteLine($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu}");
-			if (immediate)
-			{
-				CustomPacket cp = new CustomPackets.CustomPacket0();
-				cp.Packets.Add(pkt);
-				cp.SequenceNumber = _sendSeqNum++;
-				SendPacket(cp);
-				lock (_recoveryQueue)
-				{
-					_recoveryQueue.Add(cp.SequenceNumber, cp);
-				}
-			}
-			else
-			{
-				if (_sendQueue.GetSize() + pkt.GetSize() > _mtu)
-				{
-					SendQueuedPackets();
-				}
-				lock (_sendQueue)
-				{
-					_sendQueue.Packets.Add(pkt);
-				}
-			}
-		}
-
-		public void HandlePacket(byte[] data)
+		protected override void HandlePacket(byte[] data)
 		{
 			if (_state == Disconnected) return;
-			_timeLastPacketReceived = JavaHelper.CurrentTimeMillis();
-			
+
 			switch (data[0])
 			{
 				case JRakLibPlus.IdOpenConnectionRequest1:
@@ -254,44 +128,6 @@ namespace SharpRakLib.Server
 						_state = Handshaking;
 					}
 					break;
-				// ACK/NACK
-
-				case JRakLibPlus.Ack:
-					if (_state != Connected || _state == Handshaking) break;
-					var ack = new AckPacket();
-					ack.Decode(data);
-
-					lock (_recoveryQueue)
-					{
-						foreach (var seq in ack.Packets)
-						{
-							if (_recoveryQueue.ContainsKey(seq))
-							{
-								_recoveryQueue.Remove(seq);
-							}
-						}
-					}
-
-					break;
-				case JRakLibPlus.Nack:
-					if (_state != Connected || _state == Handshaking) break;
-					var nack = new NackPacket();
-					nack.Decode(data);
-
-					lock (_recoveryQueue)
-					{
-						foreach (var seq in nack.Packets)
-						{
-							if (_recoveryQueue.ContainsKey(seq))
-							{
-								var pk = _recoveryQueue[seq];
-								pk.SequenceNumber = _sendSeqNum++;
-								SendPacket(pk);
-								_recoveryQueue.Remove(seq);
-							}
-						}
-					}
-					break;
 				default:
 					if (_state == Connected || _state == Handshaking)
 					{
@@ -306,94 +142,9 @@ namespace SharpRakLib.Server
 			}
 		}
 
-		private void HandleDataPacket(byte[] data)
+
+		protected override bool HandleEncapsulated(EncapsulatedPacket pk)
 		{
-			CustomPacket pk = new CustomPackets.CustomPacket0();
-			pk.Decode(data);
-
-			var diff = pk.SequenceNumber - _lastSeqNum;
-			lock (_nackQueue)
-			{
-				if (_nackQueue.Count != 0)
-				{
-					_nackQueue.Remove(pk.SequenceNumber);
-					if (diff != 1)
-					{
-						for (var i = _lastSeqNum + 1; i < pk.SequenceNumber; i++)
-						{
-							_nackQueue.Add(i);
-						}
-					}
-				}
-			}
-			lock (_ackQueue)
-			{
-				_ackQueue.Add(pk.SequenceNumber);
-			}
-
-			if (diff >= 1)
-			{
-				_lastSeqNum = pk.SequenceNumber;
-			}
-
-			pk.Packets.ForEach(HandleEncapsulatedPacket);
-		}
-
-		private void HandleSplitPacket(EncapsulatedPacket pk)
-		{
-			if (pk.SplitCount >= MaxSplitSize || pk.SplitIndex >= MaxSplitSize || pk.SplitIndex < 0)
-			{
-				return;
-			}
-
-			lock (_splitQueue)
-			{
-				if (!_splitQueue.ContainsKey(pk.SplitId))
-				{
-					if (_splitQueue.Count >= MaxSplitCount)
-						return; //Too many split packets in the queue will increase memory usage
-					var m = new Dictionary<int, EncapsulatedPacket>();
-					m.Add(pk.SplitIndex, pk);
-					_splitQueue.Add(pk.SplitId, m);
-				}
-				else
-				{
-					var m = _splitQueue[pk.SplitId];
-					m.Add(pk.SplitIndex, pk);
-					_splitQueue.Add(pk.SplitId, m);
-				}
-
-				if (_splitQueue[pk.SplitId].Count == pk.SplitCount)
-				{
-					var ep = new EncapsulatedPacket();
-					
-					var packets = _splitQueue[pk.SplitId];
-					
-					using (MemoryStream stream = new MemoryStream())
-					{
-						for (var i = 0; i < pk.SplitCount; i++)
-						{
-							stream.Write(packets[i].Payload);
-						}
-
-						ep.Payload = stream.ToArray();
-					}
-					_splitQueue.Remove(pk.SplitId);
-
-					HandleEncapsulatedPacket(ep);
-				}
-			}
-		}
-
-
-		private void HandleEncapsulatedPacket(EncapsulatedPacket pk)
-		{
-			if (!(_state == Connected || _state == Handshaking)) return;
-			if (pk.Split && _state == Connected)
-			{
-				HandleSplitPacket(pk);
-			}
-
 			switch (pk.Payload[0])
 			{
 				case JRakLibPlus.McDisconnectNotification:
@@ -450,11 +201,9 @@ namespace SharpRakLib.Server
 
 					_lastPing = (int) (JavaHelper.CurrentTimeMillis() - pong2.SendPingTime);
 					break;
-
-				default:
-					_server.HookManager.ActivateHook(HookManager.Hook.PacketRecieved, this, pk);
-					break;
 			}
+
+			return false;
 		}
 
 		/**
@@ -473,7 +222,7 @@ namespace SharpRakLib.Server
 			AddToQueue(ep3, true);
 		}
 
-		public void Disconnect(string reason)
+		public override void Disconnect(string reason)
 		{
 			Console.WriteLine($"Sending disconnect: {reason}");
 			
