@@ -16,7 +16,7 @@ namespace SimpleServer.Network
 
 		public void HandlePacket(EncapsulatedPacket packet)
 		{
-			Log.Warn("Payload:");
+			Log.Warn($"{packet.GetType()} Payload:");
 			foreach (var i in packet.Payload)
 			{
 				Console.Write(i.ToString("x2") + " ");

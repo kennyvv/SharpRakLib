@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingRakLib", "TestingRak
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleServer", "SimpleServer\SimpleServer.csproj", "{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRakLib.Core", "SharpRakLib.Core\SharpRakLib.Core.csproj", "{43F23471-611E-4EDB-830E-ABA3AB543D3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43F23471-611E-4EDB-830E-ABA3AB543D3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43F23471-611E-4EDB-830E-ABA3AB543D3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43F23471-611E-4EDB-830E-ABA3AB543D3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43F23471-611E-4EDB-830E-ABA3AB543D3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
