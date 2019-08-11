@@ -1,10 +1,13 @@
 ﻿using System;
+using NLog;
 using SharpRakLib.Util;
 
 namespace SharpRakLib.Protocol.RakNet
 {
 	public class EncapsulatedPacket : RakNetPacket
 	{
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
+		
 		//If RELIABLE, RELIABLE_SEQUENCED, RELIABLE_ORDERED
 		public int MessageIndex = -1;
 		public int OrderChannel = -1;
@@ -24,7 +27,7 @@ namespace SharpRakLib.Protocol.RakNet
 
 		public override void _encode(BedrockStream buffer)
 		{
-			buffer.WriteByte((byte) (((byte) Reliability << 5) | (Split ? 0x00010000 : 0)));
+			buffer.WriteByte((byte) (((byte) Reliability << 5) | (Split ? Convert.ToByte("00010000", 2) : 0)));
 
 			buffer.WriteBEShort((short) (Payload.Length*8)); //Bytes to Bits
 
@@ -55,9 +58,10 @@ namespace SharpRakLib.Protocol.RakNet
 		{
 			//Header
 			var flags = buffer.ReadByte();
-			Reliability = (Reliability) (byte) ((flags & 0x11100000) >> 5);
-			Split = (flags & 0x00010000) > 0;
-			var length = (int) Math.Ceiling(buffer.ReadUShort()/8.0); //Bits to Bytes
+			Reliability = (Reliability) ((flags & Convert.ToByte("011100000", 2)) >> 5);;
+			Split = ((flags & Convert.ToByte("00010000", 2)) > 0);// (flags & 0x00010000) > 0;
+			
+			var dataBitLength = buffer.ReadBEShort();
 
 			if (Reliability == Reliability.Reliable || Reliability == Reliability.ReliableSequenced ||
 			    Reliability == Reliability.ReliableOrdered)
@@ -74,12 +78,14 @@ namespace SharpRakLib.Protocol.RakNet
 
 			if (Split)
 			{
-				SplitCount = Endian.SwapInt32(buffer.ReadInt());
-				SplitId = Endian.SwapUInt16(buffer.ReadUShort());
-				SplitIndex = Endian.SwapInt32(buffer.ReadInt());
+				SplitCount = buffer.ReadInt(true); //Endian.SwapInt32(buffer.ReadInt());
+				SplitId = buffer.ReadBEShort();//  Endian.SwapUInt16(buffer.ReadUShort());
+				SplitIndex = buffer.ReadInt(true);
 			}
 
-			Payload = buffer.Read(length);
+			var msgLength = (int) Math.Ceiling(((double) dataBitLength) / 8);
+			
+			Payload = buffer.Read(msgLength);
 		}
 
 		public override byte GetPid()

@@ -199,7 +199,7 @@ namespace SharpRakLib.Server
 					var pong2 = new PongPacket();
 					pong2.Decode(pk.Payload);
 
-					_lastPing = (int) (JavaHelper.CurrentTimeMillis() - pong2.SendPingTime);
+					_lastPing = (int) (_server.Runtime - pong2.SendPingTime);
 					break;
 			}
 
@@ -214,7 +214,7 @@ namespace SharpRakLib.Server
 		public void PingClient()
 		{
 			var ping2 = new PingPacket();
-			ping2.PingId = JavaHelper.CurrentTimeMillis();
+			ping2.PingId = _server.Runtime;
 
 			var ep3 = new EncapsulatedPacket();
 			ep3.Reliability = Reliability.Unreliable;

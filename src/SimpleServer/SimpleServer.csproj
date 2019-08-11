@@ -6,10 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="log4net" Version="2.0.8" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SharpRakLib.Core\SharpRakLib.Core.csproj" />
     </ItemGroup>
 
@@ -17,6 +13,10 @@
       <None Update="App.config">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NLog" Version="4.6.6" />
     </ItemGroup>
 
 </Project>

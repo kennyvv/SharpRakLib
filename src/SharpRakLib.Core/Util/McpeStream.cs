@@ -100,10 +100,14 @@ namespace SharpRakLib.Util
 		}
 
 
-		public int ReadInt()
+		public int ReadInt(bool bigEndian = false)
 		{
 			var dat = Read(4);
 			var value = BitConverter.ToInt32(dat, 0);
+
+			if (bigEndian)
+				value = Endian.SwapInt32(value);
+			
 			return value;
 		}
 

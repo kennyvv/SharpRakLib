@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
-using log4net;
+using NLog;
 using SharpRakLib.Core;
 using SharpRakLib.Server;
 using SimpleServer.Network;
@@ -9,7 +9,7 @@ namespace SimpleServer
 {
 	public class SessionManager
 	{
-		private ILog Log = LogManager.GetLogger(typeof(SessionManager));
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
 		private ConcurrentDictionary<IPEndPoint, NetworkSession> Sessions { get; }
 		public SessionManager()
 		{
@@ -25,11 +25,11 @@ namespace SimpleServer
 		{
 			if (!Sessions.TryAdd(session.Address, new NetworkSession(session)))
 			{
-				Log.WarnFormat("Could not create session!");
+				Log.Warn("Could not create session!");
 			}
 			else
 			{
-				Log.InfoFormat("Session started for {0}", session.Address);
+				Log.Warn("Session started for {0}", session.Address);
 			}
 		}
 

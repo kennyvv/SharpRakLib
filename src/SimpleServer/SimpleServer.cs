@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
+using NLog;
 using SharpRakLib;
 using SharpRakLib.Core;
 using SharpRakLib.Protocol.RakNet;
@@ -17,7 +17,7 @@ namespace SimpleServer
 {
 	public class SimpleServer
 	{
-		private ILog Log = LogManager.GetLogger(typeof(SimpleServer));
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
 		public SessionManager SessionManager { get; }
 		private RakNetServer Server { get; set; }
 		private MotdProvider MotdProvider { get; set; }
@@ -36,7 +36,7 @@ namespace SimpleServer
 			{
 				try
 				{
-					long startTime = JavaHelper.CurrentTimeMillis();
+					long startTime = Server.Runtime;
 
 					//Do Ticks
 					if (_currentTick%5 == 0)
@@ -45,7 +45,7 @@ namespace SimpleServer
 						Server.BroadcastName = MotdProvider.GetMotd();
 					}
 
-					long endTime = JavaHelper.CurrentTimeMillis();
+					long endTime = Server.Runtime;
 
 					if (endTime - startTime < 50)
 					{

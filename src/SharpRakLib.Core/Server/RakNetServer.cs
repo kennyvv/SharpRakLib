@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using NLog;
 using SharpRakLib.Core;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.RakNet;
@@ -13,24 +15,19 @@ using SharpRakLib.Util;
 
 namespace SharpRakLib.Server
 {
-	public class RakNetServer : ISessionManager
+	public class RakNetServer : BaseSessionManager
 	{
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
+		
 		private readonly Dictionary<string, long[]> _blacklist = new Dictionary<string, long[]>();
 		private bool _disconnectInvalidProtocols;
-		//private UdpSocketReceiver socket;
-		private readonly Queue<DatagramPacket> _sendQueue = new Queue<DatagramPacket>();
 
 		private readonly Dictionary<string, Session> _sessions = new Dictionary<string, Session>();
-
-		private readonly List<Action> _shutdownTasks = new List<Action>();
-
 		private readonly UdpClient _socket;
-		private readonly Dictionary<TaskInfo, Action> _tasks = new Dictionary<TaskInfo, Action>();
 
 		public RakNetServer(IPEndPoint bindAddress, ServerOptions options)
 		{
 			_socket = new UdpClient(bindAddress);
-			//socket = new UdpSocketReceiver();	
 			this.BindAddress = bindAddress;
 
 			BroadcastName = options.BroadcastName;
@@ -43,14 +40,9 @@ namespace SharpRakLib.Server
 			ServerId = options.ServerId;
 			WarnOnCantKeepUp = options.WarnOnCantKeepUp;
 
-			//this.logger = LoggerFactory.getLogger("JRakLibPlus Server");
-
-			HookManager = new HookManager(this);
-
 			_socket.Client.ReceiveBufferSize = ReceiveBufferSize;
 			_socket.Client.SendBufferSize = SendBufferSize;
-
-			AddTask(0, HandlePackets);
+			
 			AddTask(0, CheckBlacklist);
 			AddShutdownTask(() =>
 			{
@@ -58,129 +50,27 @@ namespace SharpRakLib.Server
 			});
 		}
 
-		public bool Running { get; set; }
-		public bool Stopped { get; set; } = true;
-		//private Logger logger;
-		public string BroadcastName { get; set; }
-		public int MaxPacketsPerTick { get; set; }
-		public int ReceiveBufferSize { get; }
-		public int SendBufferSize { get; }
-		public int PacketTimeout { get; set; }
-		public bool PortChecking { get; set; }
-		public long ServerId { get; }
-		public bool WarnOnCantKeepUp { get; }
-
-		public IPEndPoint BindAddress { get; }
-		public HookManager HookManager { get; }
-
-		/**
-     * Starts the server in the current thread. This method will block
-     * as long as the server is running.
-     */
-
-		public void Start()
+		public override void Start()
 		{
 			Running = true;
 			Stopped = false;
 			Run();
 		}
 
-		/**
-		 * Stops the server. This method will not block, to check if
-		 * the server has finished it's last tick use <code>isStopped()</code>
-		 */
-
-		public void Stop()
+		public override void Stop()
 		{
 			Running = false;
 		}
 
-		protected virtual void Run()
+		protected override int Send(byte[] data, int length, IPEndPoint endPoint)
 		{
-			//this.logger.info("Server starting...");
-			Console.WriteLine("Starting server...");
-			if (Bind())
-			{
-				Console.WriteLine("RakNetServer bound to " + BindAddress + ", running on RakNet protocol " +
-				                  JRakLibPlus.RaknetProtocol);
-				//this.logger.info("RakNetServer bound to " + bindAddress + ", running on RakNet protocol " + JRakLibPlus.RAKNET_PROTOCOL);
-				try
-				{
-					while (Running)
-					{
-						var start = JavaHelper.CurrentTimeMillis();
-						Tick();
-						var elapsed = JavaHelper.CurrentTimeMillis() - start;
-						if (elapsed >= 50)
-						{
-							if (WarnOnCantKeepUp)
-								Console.WriteLine("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
-							//this.logger.warn("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
-						}
-						else
-						{
-							Thread.Sleep((int) (50 - elapsed));
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					//this.logger.error("Fatal Exception, server has crashed! " + e.Source + ": " + e);
-					//e.printStackTrace();
-					Stop();
-				}
-			}
-
-			//this.shutdownTasks.ForEach(Runnable::run);
-			lock (_shutdownTasks)
-			{
-				foreach (var i in _shutdownTasks)
-				{
-					i.Invoke();
-				}
-			}
-
-			Stopped = true;
-			//	this.logger.info("Server has stopped.");
+			return _socket.Send(data, length, endPoint);
 		}
 
-		private void Tick()
-		{
-			if (this._tasks.Count == 0) return;
-			lock (this._tasks)
-			{
-				var remove = new List<TaskInfo>();
-				var tasks = new Dictionary<TaskInfo, Action>(this._tasks);
-				foreach (var ti in tasks.Keys.Where(ti => JavaHelper.CurrentTimeMillis() - ti.RegisteredAt >= ti.RunIn))
-				{
-					try
-					{
-						this._tasks[ti].Invoke();
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine("Exception: " + ex);
-					}
-					remove.Add(ti);
-				}
-				foreach (var i in remove)
-				{
-					tasks.Remove(i);
-				}
-			}
-		}
-
-		private bool Bind()
+		protected override bool Bind()
 		{
 			try
 			{
-				//	this.socket.StartListeningAsync(bindAddress.Port);
-				//this.socket.MessageReceived += MessageReceived;
-
-				//this.socket.setBroadcast(true);
-				//this.socket.setSendBufferSize(this.sendBufferSize);
-				//this.socket.setReceiveBufferSize(this.receiveBufferSize);
-
 				_socket.EnableBroadcast = true;
 				_socket.BeginReceive(RequestCallback, _socket);
 			}
@@ -223,47 +113,13 @@ namespace SharpRakLib.Server
 			}
 
 
-			//	Console.WriteLine("Received: " + receiveBytes.Length);
+			//	Log.Info("Received: " + receiveBytes.Length);
 			if (receiveBytes.Length != 0)
 			{
 				listener.BeginReceive(RequestCallback, listener);				
 				var packet = new DatagramPacket(receiveBytes, senderEndpoint.Address.ToString(), senderEndpoint.Port);
 				HandlePacket(packet);
 			}
-		}
-
-		public void AddTask(long runIn, Action r)
-		{
-			lock (_tasks)
-			{
-				var ti = new TaskInfo
-				{
-					RunIn = runIn,
-					RegisteredAt = JavaHelper.CurrentTimeMillis()
-				};
-				if (!_tasks.ContainsKey(ti))
-				{
-					_tasks.Add(ti, r);
-				}
-			}
-		}
-
-		private void HandlePackets()
-		{
-			while (_sendQueue.Count != 0)
-			{
-				var pkt = _sendQueue.Dequeue();
-				try
-				{
-					var data = pkt.GetData();
-					_socket.Send(data, data.Length, pkt.Endpoint);
-				}
-				catch (IOException e)
-				{
-					//this.logger.warn("java.io.IOException while sending packet: " + e.getMessage());
-				}
-			}
-			AddTask(0, HandlePackets); //Run next tick
 		}
 
 		private void CheckBlacklist()
@@ -279,7 +135,7 @@ namespace SharpRakLib.Server
 						var time = i.Value[1];
 						if (time > 0)
 						{
-							if (JavaHelper.CurrentTimeMillis() - millis >= time)
+							if (ServerTime.ElapsedMilliseconds - millis >= time)
 							{
 								toRemove.Add(i.Key);
 							}
@@ -357,15 +213,6 @@ namespace SharpRakLib.Server
 			}
 		}
 
-		public void AddPacketToQueue(RakNetPacket packet, IPEndPoint address)
-		{
-			lock (_sendQueue)
-			{
-				var buffer = packet.Encode();
-				_sendQueue.Enqueue(new DatagramPacket(buffer, address.Address.ToString(), address.Port));
-			}
-		}
-
 		internal void OnSessionClose(string reason, Session session)
 		{
 			//this.logger.debug("Session " + session.getAddress().toString() + " disconnected: " + reason);
@@ -400,7 +247,7 @@ namespace SharpRakLib.Server
 			lock (_blacklist)
 			{
 				//this.logger.info("Added " + address.toString() + " to blacklist for " + time + "ms");
-				_blacklist.Add(address.ToString(), new[] {JavaHelper.CurrentTimeMillis(), time});
+				_blacklist.Add(address.ToString(), new[] {ServerTime.ElapsedMilliseconds, time});
 			}
 		}
 
@@ -409,20 +256,7 @@ namespace SharpRakLib.Server
 			//Suppress log info
 			lock (_blacklist)
 			{
-				_blacklist.Add(address.ToString(), new[] {JavaHelper.CurrentTimeMillis(), time});
-			}
-		}
-
-		/**
-		 * Adds a task to be ran when the server shuts down.
-		 * @param r The task to be ran.
-		 */
-
-		public void AddShutdownTask(Action r)
-		{
-			lock (_shutdownTasks)
-			{
-				_shutdownTasks.Add(r);
+				_blacklist.Add(address.ToString(), new[] {ServerTime.ElapsedMilliseconds, time});
 			}
 		}
 

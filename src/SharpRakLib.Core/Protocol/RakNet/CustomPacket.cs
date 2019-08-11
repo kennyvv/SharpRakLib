@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using SharpRakLib.Util;
 
 namespace SharpRakLib.Protocol.RakNet
@@ -17,9 +19,8 @@ namespace SharpRakLib.Protocol.RakNet
 		public override void _decode(BedrockStream buffer)
 		{
 			SequenceNumber = buffer.ReadLTriad();
-			while (buffer.Length - buffer.Position >= 4)
+			while (buffer.Position < buffer.Length)
 			{
-				//4 is the smallest amount of bytes an EncapsulatedPacket can be
 				var packet = new EncapsulatedPacket();
 				packet._decode(buffer);
 				Packets.Add(packet);

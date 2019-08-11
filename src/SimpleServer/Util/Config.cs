@@ -5,13 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using log4net;
+using NLog;
 
 namespace SimpleServer.Util
 {
 	public class Config
 	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(Config));
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
 
 		public static string ConfigFileName = "server.conf";
 		private static string FileContents = string.Empty;

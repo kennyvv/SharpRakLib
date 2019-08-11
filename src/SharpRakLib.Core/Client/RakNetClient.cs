@@ -7,7 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Threading;
-using log4net;
+using NLog;
+using NLog.Fluent;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.Minecraft;
 using SharpRakLib.Protocol.RakNet;
@@ -16,48 +17,23 @@ using SharpRakLib.Util;
 
 namespace SharpRakLib.Core.Client
 {
-    public class RakNetClient : ISessionManager
+    public class RakNetClient : BaseSessionManager
     {
-        private static ILog Log = LogManager.GetLogger(typeof(RakNetClient));
-        
+        private static ILogger Log = LogManager.GetCurrentClassLogger();
         private UdpClient UdpClient { get; set; }
-        private readonly Dictionary<TaskInfo, Action> _tasks = new Dictionary<TaskInfo, Action>();
-        private readonly Queue<DatagramPacket> _sendQueue = new Queue<DatagramPacket>();
 
-        public bool Running { get; set; }
-        public bool Stopped { get; set; }
-        public string BroadcastName { get; set; }
-        public int MaxPacketsPerTick { get; set; }
-        public int ReceiveBufferSize { get; }
-        public int SendBufferSize { get; }
-        public int PacketTimeout { get; set; }
-        public bool PortChecking { get; set; }
-        public long ServerId { get; }
-        public bool WarnOnCantKeepUp { get; }
-        public IPEndPoint BindAddress { get; }
-        public HookManager HookManager { get; }
-        
         private IPEndPoint ServerEndpoint { get; set; }
         public IPEndPoint ClientEndpoint { get; private set; }
-        
-        private ClientSession Session { get; set; }
+
+        public ClientSession Session { get; set; }
         public RakNetClient(IPEndPoint endpoint)
         {
-            
             Session = new ClientSession(this, endpoint, this, 1192);
             ClientEndpoint = new IPEndPoint(IPAddress.Any, 0);
             ServerEndpoint = endpoint;
-            
-            HookManager = new HookManager(this);
-
-            //UdpClient.Client.ReceiveBufferSize = ReceiveBufferSize;
-           // UdpClient.Client.SendBufferSize = SendBufferSize;
-
-            AddTask(0, HandlePackets);
-            //AddTask(0, CheckBlacklist);
         }
         
-        public void Start()
+        public override void Start()
         {
             if (Running) 
                 return;
@@ -73,7 +49,7 @@ namespace SharpRakLib.Core.Client
          * the server has finished it's last tick use <code>isStopped()</code>
          */
 
-        public void Stop()
+        public override void Stop()
         {
             Running = false;
             
@@ -83,7 +59,7 @@ namespace SharpRakLib.Core.Client
             UdpClient = null;
         }
 
-        private bool Bind()
+        protected override bool Bind()
         {
             if (UdpClient != null) return false;
 
@@ -171,117 +147,24 @@ namespace SharpRakLib.Core.Client
                 HandlePacket(packet);
             }
         }
-        
-        protected virtual void Run()
-        {
-            //this.logger.info("Server starting...");
-            if (Bind())
-            {
-                Log.Info("RakNetClient bound to " + ClientEndpoint + ", running on RakNet protocol " +
-                                  JRakLibPlus.RaknetProtocol);
-                //this.logger.info("RakNetServer bound to " + bindAddress + ", running on RakNet protocol " + JRakLibPlus.RAKNET_PROTOCOL);
-                try
-                {
-                    while (Running)
-                    {
-                        var start = JavaHelper.CurrentTimeMillis();
-                        Tick();
-                        var elapsed = JavaHelper.CurrentTimeMillis() - start;
-                        if (elapsed >= 50)
-                        {
-                            if (WarnOnCantKeepUp)
-                                Log.Info("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
-                            //this.logger.warn("Can't keep up, did the system time change or is the server overloaded? (" + elapsed + ">50)");
-                        }
-                        else
-                        {
-                            Thread.Sleep((int) (50 - elapsed));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    //this.logger.error("Fatal Exception, server has crashed! " + e.Source + ": " + e);
-                    //e.printStackTrace();
-                    Stop();
-                }
-            }
 
-            Stopped = true;
-            //	this.logger.info("Server has stopped.");
-        }
-
-        private void Tick()
+        protected override int Send(byte[] data, int length, IPEndPoint endPoint)
         {
-            if (this._tasks.Count == 0) return;
-            lock (this._tasks)
-            {
-                var remove = new List<TaskInfo>();
-                var tasks = new Dictionary<TaskInfo, Action>(this._tasks);
-                foreach (var ti in tasks.Keys.Where(ti => JavaHelper.CurrentTimeMillis() - ti.RegisteredAt >= ti.RunIn))
-                {
-                    try
-                    {
-                        this._tasks[ti].Invoke();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Info("Exception: " + ex);
-                    }
-                    remove.Add(ti);
-                }
-                foreach (var i in remove)
-                {
-                    tasks.Remove(i);
-                }
-            }
-        }
-
-        public void AddTask(long runIn, Action r)
-        {
-            lock (_tasks)
-            {
-                var ti = new TaskInfo
-                {
-                    RunIn = runIn,
-                    RegisteredAt = JavaHelper.CurrentTimeMillis()
-                };
-                if (!_tasks.ContainsKey(ti))
-                {
-                    _tasks.Add(ti, r);
-                }
-            }
-        }
-
-        private void HandlePackets()
-        {
-            while (_sendQueue.Count != 0)
-            {
-                var pkt = _sendQueue.Dequeue();
-                try
-                {
-                    var data = pkt.GetData();
-                    UdpClient.Send(data, data.Length, pkt.Endpoint);
-                }
-                catch (IOException e)
-                {
-                    //this.logger.warn("java.io.IOException while sending packet: " + e.getMessage());
-                }
-            }
-            AddTask(0, HandlePackets); //Run next tick
+            return UdpClient.Send(data, length, endPoint);
         }
 
         internal void SendData(byte[] data, IPEndPoint target)
         {
-            UdpClient.Send(data, data.Length, target);
+            Send(data, data.Length, target);
         }
 
-        private ManualResetEvent _resetEvent = new ManualResetEvent(false);
         public ClientSession WaitForSession()
         {
             while (!Session.IsConnected)
             {
-                Log.Info($"No session...");
+                SpinWait.SpinUntil(() => UdpClient != null);
+                
+                RakNetClient.Log.Info($"No session...");
                 //while (!client.IsConnected)
                 {
                     ConnectedPingOpenConnectionsPacket packet = new ConnectedPingOpenConnectionsPacket();
@@ -305,7 +188,7 @@ namespace SharpRakLib.Core.Client
                 }
             }
 
-            Log.Info($"Got session!");
+            RakNetClient.Log.Info($"Got session!");
             return Session;
         }
         
@@ -315,15 +198,5 @@ namespace SharpRakLib.Core.Client
         }
 
         private bool UseSecurity { get; set; }
-
-
-        public void AddPacketToQueue(RakNetPacket packet, IPEndPoint address)
-        {
-            lock (_sendQueue)
-            {
-                var buffer = packet.Encode();
-                _sendQueue.Enqueue(new DatagramPacket(buffer, address.Address.ToString(), address.Port));
-            }
-        }
     }
 }

@@ -5,6 +5,8 @@ namespace SharpRakLib.Protocol
 {
 	public abstract class RakNetPacket : IPacket<BedrockStream>
 	{
+		public int ReadId { get; private set; }
+		
 		/**
 		* The time this packet was last sent at. This is used internally by JRakLibPlus, and
 		* sometimes may be null.
@@ -16,7 +18,7 @@ namespace SharpRakLib.Protocol
 		 * @return The encoded bytes of this packet.
 		 */
 
-		protected byte[] Raw { get; set; }
+		public byte[] Raw { get; protected set; }
 		public byte[] Encode()
 		{
 			//IBuffer b = JavaByteBuffer.Allocate(GetSize(), false);
@@ -43,7 +45,7 @@ namespace SharpRakLib.Protocol
 			//IBuffer b = JavaByteBuffer.Wrap(bytes, false);
 			using (BedrockStream stream = new BedrockStream(new MemoryStream(bytes)))
 			{
-				stream.ReadByte();// b.GetByte();
+				ReadId = stream.ReadByte();// b.GetByte();
 				_decode(stream);
 			}
 		}
@@ -72,6 +74,7 @@ namespace SharpRakLib.Protocol
 
 		public void Decode(BedrockStream stream)
 		{
+			stream.ReadByte();
 			_decode(stream);
 		}
 	}

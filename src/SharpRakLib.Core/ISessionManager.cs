@@ -7,6 +7,7 @@ namespace SharpRakLib.Core
 {
     public interface ISessionManager
     {
+        long Runtime { get; }
         bool Running { get; set; }
         bool Stopped { get; set; }
         //private Logger logger;

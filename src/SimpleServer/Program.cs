@@ -5,8 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using log4net;
-using log4net.Config;
+using NLog;
 
 namespace SimpleServer
 {
@@ -15,11 +14,24 @@ namespace SimpleServer
 		private static SimpleServer SimpleServer { get; set; }
 		static void Main(string[] args)
 		{
-			var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-			XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+			ConfigureNLog(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 			
 			SimpleServer = new SimpleServer();
 			SimpleServer.Start();
+		}
+		
+		private static void ConfigureNLog(string baseDir)
+		{
+			string loggerConfigFile = Path.Combine(baseDir, "NLog.config");
+
+			string logsDir = Path.Combine(baseDir, "logs");
+			if (!Directory.Exists(logsDir))
+			{
+				Directory.CreateDirectory(logsDir);
+			}
+
+			NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(loggerConfigFile, true);
+			LogManager.Configuration.Variables["basedir"] = baseDir;
 		}
 	}
 }

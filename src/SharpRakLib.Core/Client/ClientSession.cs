@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 using System.Threading;
-using log4net;
+using NLog;
 using SharpRakLib.Protocol.Minecraft;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
@@ -10,7 +10,7 @@ namespace SharpRakLib.Core.Client
 {
     public class ClientSession : SessionBase
     {
-        private static ILog Log = LogManager.GetLogger(typeof(ClientSession));
+        private static ILogger Log = LogManager.GetCurrentClassLogger();
         
         private RakNetClient Client { get; }
         public ClientSession(RakNetClient client, IPEndPoint address, ISessionManager manager, short mtu) : base(address, manager, mtu)
@@ -21,11 +21,12 @@ namespace SharpRakLib.Core.Client
         protected override void HandlePacket(byte[] data)
         {
             var id = data[0];
-            Log.Info($"Got packet: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
 
-            if (data[0] <= (byte) DefaultMessageIdTypes.ID_USER_PACKET_ENUM)
+            if (id <= (byte) DefaultMessageIdTypes.ID_USER_PACKET_ENUM)
             {
-                switch (data[0])
+                Log.Info($"Got RakNet Packet: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
+                
+                switch (id)
                 {
                     //Check for pings
                     case JRakLibPlus.IdUnconnectedPongOpenConnections:
@@ -46,7 +47,7 @@ namespace SharpRakLib.Core.Client
                         OnOpenConnectionReply2(pack, Address);
                         break;
                     default:
-                        Log.Info($"Sending packet to session 1");
+                        Log.Warn($"RakNet packet unhandled: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
                         // Session?.ProcessPacket(packet.GetData());
                         break;
                 }
@@ -56,10 +57,14 @@ namespace SharpRakLib.Core.Client
                 if (_state == Connected || _state == Handshaking)
                 {
                     //noinspection ConstantConditions
-                    if (data[0] >= JRakLibPlus.CustomPacket0 && data[0] <= JRakLibPlus.CustomPacketF)
+                    if (id >= JRakLibPlus.CustomPacket0 && id <= JRakLibPlus.CustomPacketF)
                     {
                         HandleDataPacket(data);
                     }
+                }
+                else
+                {
+                    Log.Warn($"Got packet in unexpected state: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
                 }
             }
 
@@ -67,16 +72,15 @@ namespace SharpRakLib.Core.Client
         
         protected override bool HandleEncapsulated(EncapsulatedPacket pk)
         {
-            Log.Info($"Got encapsulated package: {pk}");
+            Log.Info($"Got encapsulated package: {pk} | 0x{pk.Payload[0]:X2}");
             return false;
         }
 
         private void OnOpenConnectionReply2(OpenConnectionReply2Packet packet, IPEndPoint senderEndPoint)
         {
-            Log.Info($"Connection Reply 2");
             _mtu = (short) packet.MtuSize;
             
-            Thread.Sleep(250);
+            //Thread.Sleep(250);
             
             ClientConnectPacket connectPacket = new ClientConnectPacket();
             connectPacket.ClientId = _clientGuid;

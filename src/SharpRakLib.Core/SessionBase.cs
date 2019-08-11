@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using log4net;
+using System.Threading;
+using NLog;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
@@ -11,7 +12,7 @@ namespace SharpRakLib.Core
 {
     public class SessionBase
     {
-        private static ILog Log = LogManager.GetLogger(typeof(SessionBase));
+        private static ILogger Log = LogManager.GetCurrentClassLogger();
         
         public const int Disconnected = 0;
         public const int Connecting1 = 1;
@@ -32,14 +33,14 @@ namespace SharpRakLib.Core
         private readonly List<int> _nackQueue = new List<int>();
         protected readonly Dictionary<int, CustomPacket> _recoveryQueue = new Dictionary<int, CustomPacket>();
 
-        private readonly CustomPacket _sendQueue = new CustomPackets.CustomPacket4();
+        private CustomPacket _sendQueue = new CustomPackets.CustomPacket4();
         private int _sendSeqNum;
         private int _splitId;
 
         private readonly Dictionary<int, Dictionary<int, EncapsulatedPacket>> _splitQueue =
             new Dictionary<int, Dictionary<int, EncapsulatedPacket>>();
 
-        protected int _state;
+        public int _state;
         private long _timeLastPacketReceived;
         
         public IPEndPoint Address { get; }
@@ -50,19 +51,20 @@ namespace SharpRakLib.Core
             _state = Connecting1;
             SessionManager = manager;
             _mtu = mtu;
-            
+
             SessionManager.AddTask(0, Update);
         }
 
         public virtual void Disconnect(string reason)
         {
-            
+            Log.Warn($"Disconnect: {reason}");
         }
         
         private void Update()
         {
             if (_state == Disconnected) return;
-            if (JavaHelper.CurrentTimeMillis() - _timeLastPacketReceived >= SessionManager.PacketTimeout)
+            
+            if (SessionManager.Runtime - _timeLastPacketReceived >= SessionManager.PacketTimeout)
             {
                 Disconnect("timeout");
             }
@@ -94,55 +96,68 @@ namespace SharpRakLib.Core
                 SessionManager.AddTask(0, Update);
             }
         }
-        
+
+        private object _queueLock = new object();
         private void SendQueuedPackets()
         {
-            lock (_sendQueue)
+            CustomPacket queue;
+            lock (_queueLock)
             {
-                if (_sendQueue.Packets.Count != 0)
-                {
-                    _sendQueue.SequenceNumber = _sendSeqNum++;
-                    SendPacket(_sendQueue);
-                    lock (_recoveryQueue)
-                    {
-                        _recoveryQueue.Add(_sendQueue.SequenceNumber, _sendQueue);
-                    }
+                queue = _sendQueue;
 
-                    _sendQueue.Packets.Clear();
+                if (queue.Packets.Count != 0)
+                {
+                    _sendQueue = new CustomPackets.CustomPacket4();
+                }
+                else
+                {
+                    return;
                 }
             }
+
+            queue.SequenceNumber = Interlocked.Increment(ref _sendSeqNum);
+            SendPacket(queue);
+            
+            Log.Info($"Sending queue: {queue.Packets.Count}");
+            
+            lock (_recoveryQueue)
+            {
+                _recoveryQueue.Add(queue.SequenceNumber, queue);
+            }
         }
-        
-        public void SendPacket(RakNetPacket packet)
+
+        protected void SendPacket(RakNetPacket packet)
         {
             Log.Info($"Sending: {packet.ToString()} | MTU: {_mtu}");
 			
             SessionManager.AddPacketToQueue(packet, Address);
         }
-        
-        protected void AddToQueue(EncapsulatedPacket pkt, bool immediate)
+
+        public void AddToQueue(EncapsulatedPacket pkt, bool immediate)
         {
-            Log.Info($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu}");
             if (immediate)
             {
                 CustomPacket cp = new CustomPackets.CustomPacket0();
                 cp.Packets.Add(pkt);
-                cp.SequenceNumber = _sendSeqNum++;
+                cp.SequenceNumber = Interlocked.Increment(ref _sendSeqNum);
                 SendPacket(cp);
                 lock (_recoveryQueue)
                 {
                     _recoveryQueue.Add(cp.SequenceNumber, cp);
                 }
+                Log.Info($"Sent immediate: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]}");
             }
             else
             {
-                if (_sendQueue.GetSize() + pkt.GetSize() > _mtu)
+                lock (_queueLock)
                 {
-                    SendQueuedPackets();
-                }
-                lock (_sendQueue)
-                {
+                    if (_sendQueue.GetSize() + pkt.GetSize() > _mtu)
+                    {
+                        SendQueuedPackets();
+                    }
+                    
                     _sendQueue.Packets.Add(pkt);
+                    Log.Info($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu} | Queued: {_sendQueue.Packets.Count}");
                 }
             }
         }
@@ -150,18 +165,22 @@ namespace SharpRakLib.Core
         public void ProcessPacket(byte[] data)
         {
             if (_state == Disconnected) return;
-            _timeLastPacketReceived = JavaHelper.CurrentTimeMillis();
-            HandlePacket(data);
-            return;
+            _timeLastPacketReceived = SessionManager.Runtime;
             
             switch (data[0])
             {
                 // ACK/NACK
                 case JRakLibPlus.Ack:
-                    if (_state != Connected || _state == Handshaking) break;
+                    if (_state != Connected || _state == Handshaking)
+                    {
+                        Log.Warn($"Got ACK in state: {_state}");
+                        break;
+                    }
                     var ack = new AckPacket();
                     ack.Decode(data);
-
+                    
+                    Log.Info($"Got ACK");
+                    
                     lock (_recoveryQueue)
                     {
                         foreach (var seq in ack.Packets)
@@ -175,10 +194,17 @@ namespace SharpRakLib.Core
 
                     break;
                 case JRakLibPlus.Nack:
-                    if (_state != Connected || _state == Handshaking) break;
+                    if (_state != Connected || _state == Handshaking)
+                    {
+                        Log.Warn($"Got NACK in state: {_state}");
+                        break;
+                    }
+                    
                     var nack = new NackPacket();
                     nack.Decode(data);
 
+                    Log.Info($"Got NACK");
+                    
                     lock (_recoveryQueue)
                     {
                         foreach (var seq in nack.Packets)
@@ -197,6 +223,8 @@ namespace SharpRakLib.Core
                     HandlePacket(data);
                     break;
             }
+            
+            //HandlePacket(data);
         }
         
         protected virtual void HandlePacket(byte[] data)
@@ -206,6 +234,8 @@ namespace SharpRakLib.Core
         
         protected void HandleDataPacket(byte[] data)
         {
+            _timeLastPacketReceived = SessionManager.Runtime;
+            
             CustomPacket pk = new CustomPackets.CustomPacket0();
             pk.Decode(data);
 
@@ -234,6 +264,7 @@ namespace SharpRakLib.Core
                 _lastSeqNum = pk.SequenceNumber;
             }
 
+            Log.Info($"Sequence: {pk.SequenceNumber} | Packets: {pk.Packets.Count}");
             pk.Packets.ForEach(HandleEncapsulatedPacket);
         }
 
@@ -241,22 +272,23 @@ namespace SharpRakLib.Core
         {
             if (!(_state == Connected || _state == Handshaking))
                 return;
-            
+
             if (pk.Split && _state == Connected)
             {
                 HandleSplitPacket(pk);
+                return;
             }
             
             if (!HandleEncapsulated(pk))
             {
                 //pk.Payload
-                Log.Warn($"Payload:");
+                /*Log.Warn($"Payload (0x{pk.ReadId:X2}):");
                 foreach (var i in pk.Payload)
                 {
                     Console.Write(i.ToString("x2") + " ");
                 }
                 Console.WriteLine();
-                Console.WriteLine();
+                Console.WriteLine();*/
                 
                 SessionManager.HookManager.ActivateHook(HookManager.Hook.PacketRecieved, this, pk);
             }
@@ -308,6 +340,7 @@ namespace SharpRakLib.Core
                     }
                     _splitQueue.Remove(pk.SplitId);
 
+                    Log.Info($"Read split packet");
                     HandleEncapsulatedPacket(ep);
                 }
             }
