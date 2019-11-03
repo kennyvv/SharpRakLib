@@ -15,7 +15,7 @@ namespace SharpRakLib.Protocol.RakNet
 		public int OrderIndex = -1;
 		//Payload buffer
 		public byte[] Payload = new byte[0];
-		public Reliability Reliability;
+		public Reliability Reliability = Reliability.ReliableOrdered;
 		public bool Split;
 		//If split
 		public int SplitCount = -1;
@@ -27,8 +27,7 @@ namespace SharpRakLib.Protocol.RakNet
 
 		public override void _encode(BedrockStream buffer)
 		{
-			buffer.WriteByte((byte) (((byte) Reliability << 5) | (Split ? Convert.ToByte("00010000", 2) : 0)));
-
+			buffer.WriteByte((byte) ((((byte)Reliability) << 5) | (Split ? Convert.ToByte("00010000", 2) : 0x00)));
 			buffer.WriteBEShort((short) (Payload.Length*8)); //Bytes to Bits
 
 			if (Reliability == Reliability.Reliable || Reliability == Reliability.ReliableSequenced ||

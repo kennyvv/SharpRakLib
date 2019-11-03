@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="MiNET" Version="1.0.2025" />
+      <PackageReference Include="MiNET" Version="1.0.2040" />
       <PackageReference Include="NLog" Version="4.6.6" />
     </ItemGroup>
 

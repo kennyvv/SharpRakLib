@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SharpRakLib
+﻿namespace SharpRakLib
 {
 	public class JRakLibPlus
 	{
@@ -53,35 +51,5 @@ namespace SharpRakLib
 			0xfd, 0xfd, 0xfd, 0xfd,
 			0x12, 0x34, 0x56, 0x78
 		};
-
-
-		public static byte[][] SplitByteArray(byte[] array, int chunkSize)
-		{
-			var splits = new byte[1024][];
-
-			for (var i = 0; i < splits.Length; i++)
-			{
-				splits[i] = new byte[chunkSize];
-			}
-
-			var chunks = 0;
-			for (var i = 0; i < array.Length; i += chunkSize)
-			{
-				if (array.Length - i > chunkSize)
-				{
-					Array.Copy(array, i, splits[chunks], 0, i + chunkSize);
-				}
-				else
-				{
-					Array.Copy(array, i, splits[chunks], 0, array.Length - i);
-					//splits[chunks] = Arrays.copyOfRange(array, i, array.length);
-				}
-				chunks++;
-			}
-
-			//splits = Arrays.copyOf(splits, chunks);
-
-			return splits;
-		}
 	}
 }

@@ -67,8 +67,15 @@ namespace SharpRakLib.Util
 			return BaseStream.ReadByte();
 		}
 
-		public byte[] Read(int length)
+		public byte[] Read(int length, bool slurp = false)
 		{
+			if (!slurp && length == 0) return new byte[0];
+			
+			if (length == 0)
+			{
+				length = (int) (BaseStream.Length - BaseStream.Position);
+			}
+			
 			//byte[] d = new byte[length];
 			//Read(d, 0, d.Length);
 			//return d;

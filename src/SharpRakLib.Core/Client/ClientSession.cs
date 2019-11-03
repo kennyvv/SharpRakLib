@@ -39,6 +39,8 @@ namespace SharpRakLib.Core.Client
                         OpenConnectionReply1Packet reply = new OpenConnectionReply1Packet();
                         reply.Decode(data);
 
+                        _mtu = reply.MtuSize;
+                        
                         SendOpenConnectionRequest2(reply, Address);
                         break;
                     case JRakLibPlus.IdOpenConnectionReply2:
@@ -72,7 +74,7 @@ namespace SharpRakLib.Core.Client
         
         protected override bool HandleEncapsulated(EncapsulatedPacket pk)
         {
-            Log.Info($"Got encapsulated package: {pk} | 0x{pk.Payload[0]:X2}");
+          //  Log.Info($"Got encapsulated package: {pk} | 0x{pk.Payload[0]:X2}");
             return false;
         }
 
@@ -90,7 +92,7 @@ namespace SharpRakLib.Core.Client
             var ep = new EncapsulatedPacket();
             ep.Reliability = Reliability.Unreliable;
             ep.Payload = connectPacket.Encode();
-            AddToQueue(ep, true);
+            AddPacketToQueue(ep, true);
 
             _state = Handshaking;
         }

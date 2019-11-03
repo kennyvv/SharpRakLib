@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using NLog;
 using SharpRakLib.Core;
 using SharpRakLib.Protocol;
 using SharpRakLib.Protocol.Minecraft;
@@ -12,8 +13,9 @@ namespace SharpRakLib.Server
 {
 	public class Session : SessionBase
 	{
+		private static ILogger Log = LogManager.GetCurrentClassLogger();
+		
 		private RakNetServer _server;
-		private int _lastPing = -99;
 		public Session(IPEndPoint address, RakNetServer server) : base(address, server, 0)
 		{
 			_server = server;
@@ -75,6 +77,8 @@ namespace SharpRakLib.Server
 		{
 			if (_state == Disconnected) return;
 
+			_timeLastPacketReceived = SessionManager.Runtime;
+			
 			switch (data[0])
 			{
 				case JRakLibPlus.IdOpenConnectionRequest1:
@@ -92,6 +96,8 @@ namespace SharpRakLib.Server
 						}
 						_mtu = (short)req1.NullPayloadLength;
 
+						Log.Info($"Got mtu: {req1.NullPayloadLength}");
+						
 						var reply1 = new OpenConnectionReply1Packet();
 						reply1.MtuSize = _mtu;
 						reply1.ServerId = _server.ServerId;
@@ -115,6 +121,7 @@ namespace SharpRakLib.Server
 
 						if (req2.MtuSize != _mtu)
 						{
+							Log.Info($"Incorrect MTU! Got: {req2.MtuSize} Expected: {_mtu}");
 							Disconnect("Incorrect MTU");
 							return;
 						}
@@ -122,7 +129,7 @@ namespace SharpRakLib.Server
 						var reply2 = new OpenConnectionReply2Packet();
 						reply2.ServerId = _server.ServerId;
 						reply2.MtuSize = (ushort) _mtu;
-						reply2.ClientAddress = SystemAddress.FromIpEndPoint(Address);
+						reply2.ClientAddress = Address;
 						SendPacket(reply2);
 
 						_state = Handshaking;
@@ -145,83 +152,9 @@ namespace SharpRakLib.Server
 
 		protected override bool HandleEncapsulated(EncapsulatedPacket pk)
 		{
-			switch (pk.Payload[0])
-			{
-				case JRakLibPlus.McDisconnectNotification:
-					Disconnect("client disconnected");
-					break;
-				case JRakLibPlus.McClientConnect:
-					var ccp = new ClientConnectPacket();
-					ccp.Decode(pk.Payload);
-
-					var shp = new ServerHandshakePacket();
-					shp.Address = SystemAddress.FromIpEndPoint(Address);
-					shp.SendPing = ccp.SendPing;
-					shp.SendPong = ccp.SendPing + 1000L;
-
-					var ep = new EncapsulatedPacket();
-					ep.Reliability = Reliability.Unreliable;
-					ep.Payload = shp.Encode();
-					AddToQueue(ep, true);
-					break;
-
-				case JRakLibPlus.McClientHandshake:
-					if (_server.PortChecking)
-					{
-						var chp = new ClientHandshakePacket();
-						chp.Decode(pk.Payload);
-						if (chp.Address.Port != _server.BindAddress.Port)
-						{
-							Disconnect("Invalid Port");
-						}
-					}
-					_state = Connected;
-
-					PingClient();
-					//this.server.addTask(3000, ()-> this.server.getLogger().debug("Client latency is " + getLastPing() + "ms"));
-					break;
-
-				case JRakLibPlus.McPing:
-					var ping = new PingPacket();
-					ping.Decode(pk.Payload);
-
-					var pong = new PongPacket();
-					pong.SendPingTime = ping.PingId;
-					pong.SendPongTime = DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-					
-					var ep2 = new EncapsulatedPacket();
-					ep2.Reliability = Reliability.Unreliable;
-					ep2.Payload = pong.Encode();
-					AddToQueue(ep2, true);
-					break;
-
-				case JRakLibPlus.McPong:
-					var pong2 = new PongPacket();
-					pong2.Decode(pk.Payload);
-
-					_lastPing = (int) (_server.Runtime - pong2.SendPingTime);
-					break;
-			}
-
 			return false;
 		}
-
-		/**
-		 * Pings the client. The latency in milliseconds is stored in the
-		 * <code>lastPing</code> variable and can be retrieved using <code>getLastPing()</code>
-		 */
-
-		public void PingClient()
-		{
-			var ping2 = new PingPacket();
-			ping2.PingId = _server.Runtime;
-
-			var ep3 = new EncapsulatedPacket();
-			ep3.Reliability = Reliability.Unreliable;
-			ep3.Payload = ping2.Encode();
-			AddToQueue(ep3, true);
-		}
-
+		
 		public override void Disconnect(string reason)
 		{
 			Console.WriteLine($"Sending disconnect: {reason}");
@@ -229,7 +162,7 @@ namespace SharpRakLib.Server
 			var ep = new EncapsulatedPacket();
 			ep.Reliability = Reliability.Unreliable;
 			ep.Payload = new DisconnectNotificationPacket().Encode();
-			AddToQueue(ep, true);
+			AddPacketToQueue(ep, false);
 
 			_server.internal_addToBlacklist(Address, 500);
 			// Prevent another session from opening, as the client will reply back with a few more packets
