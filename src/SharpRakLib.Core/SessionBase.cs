@@ -90,10 +90,13 @@ namespace SharpRakLib.Core
                             acks.Add(value);
                         }
                     }
-                    
-                    var ack = new AckPacket();
-                    ack.Packets = acks.ToArray();
-                    SendPacket(ack);
+
+                    if (acks.Count > 0)
+                    {
+                        var ack = new AckPacket();
+                        ack.Packets = acks.ToArray();
+                        SendPacket(ack);
+                    }
                 }
 
                 lock (_nackQueue)
@@ -111,7 +114,7 @@ namespace SharpRakLib.Core
 
                 SendQueuedPackets();
 
-                SessionManager.AddTask(0, Tick);
+                SessionManager.AddTask(1, Tick);
             }
         }
 

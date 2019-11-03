@@ -13,7 +13,7 @@ namespace SharpRakLib.Protocol.RakNet
 		{
 			//IBuffer payload = JavaByteBuffer.Allocate(0, false);
 			var ranges = Slize(Packets.ToList());
-			buffer.WriteShort((short) ranges.Count);
+			buffer.WriteBEShort((short) ranges.Count);
 			foreach (var range in ranges)
 			{
 				var singleEntry = (byte) (range.Item1 == range.Item2 ? 0x01 : 0);
@@ -82,7 +82,7 @@ namespace SharpRakLib.Protocol.RakNet
 
 		public override void _decode(BedrockStream buffer)
 		{
-			int count = buffer.ReadShort();
+			int count = buffer.ReadBEShort();
 			var packets = new List<int>();
 			var cnt = 0;
 			for (var i = 0; i < count; i++)
