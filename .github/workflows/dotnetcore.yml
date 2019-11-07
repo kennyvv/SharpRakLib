@@ -20,15 +20,10 @@ jobs:
         dotnet build -c Release -o out
         cd ..
         
-    - name: Package Release
-      run: |
-        cd src
-        dotnet pack -c Release -o out SharpRakLib.Core/SharpRakLib.Core.csproj
-        cd ..
-      
     - name: Push to NuGet
       run: |
         cd src
+        dotnet pack -c Release -o out SharpRakLib.Core/SharpRakLib.Core.csproj
         dotnet nuget push out/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
