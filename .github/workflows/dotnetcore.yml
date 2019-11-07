@@ -5,13 +5,33 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
-      with:
+      with:  
         dotnet-version: 2.2.108
+
     - name: Build with dotnet
-      run: dotnet build --configuration Release src/SharpRakLib.sln
+      run: |
+        cd src
+        dotnet build -c Release -o out
+        cd ..
+        
+    - name: Package Release
+      run: |
+        cd src
+        dotnet pack -c Release -o out --no-build
+        cd ..
+        
+    - name: Install NuGet client
+      uses: warrenbuckley/Setup-Nuget@v1
+      
+    - name: Push to NuGet
+      run: |
+        cd src
+        nuget push out/SharpRakLib.Core.*.nupkg -ApiKey ${NUGET_TOKEN}
+      env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
