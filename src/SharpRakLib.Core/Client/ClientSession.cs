@@ -22,10 +22,8 @@ namespace SharpRakLib.Core.Client
         {
             var id = data[0];
 
-            if (id <= (byte) DefaultMessageIdTypes.ID_USER_PACKET_ENUM)
+            if (id <= (byte) 126)
             {
-                Log.Info($"Got RakNet Packet: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
-                
                 switch (id)
                 {
                     //Check for pings
@@ -49,7 +47,7 @@ namespace SharpRakLib.Core.Client
                         OnOpenConnectionReply2(pack, Address);
                         break;
                     default:
-                        Log.Warn($"RakNet packet unhandled: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
+                        Log.Warn($"RakNet packet unhandled: {id} | 0x{id:X2}");
                         // Session?.ProcessPacket(packet.GetData());
                         break;
                 }
@@ -66,7 +64,7 @@ namespace SharpRakLib.Core.Client
                 }
                 else
                 {
-                    Log.Warn($"Got packet in unexpected state: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
+                    Log.Warn($"Got packet in unexpected state: {id} | 0x{id:X2}");
                 }
             }
 

@@ -1,5 +1,7 @@
-C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SharpRakLib\obj\Debug\SharpRakLib.csprojResolveAssemblyReference.cache
-C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SharpRakLib\bin\Debug\SharpRakLib.dll
-C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SharpRakLib\bin\Debug\SharpRakLib.pdb
-C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SharpRakLib\obj\Debug\SharpRakLib.dll
-C:\Users\Kenny\Documents\Visual Studio 2015\Projects\SharpRakLib\SharpRakLib\obj\Debug\SharpRakLib.pdb
+C:/Users/Kenny/Documents/Visual Studio 2015/Projects/SharpRakLib/SharpRakLib/obj/Debug/SharpRakLib.csprojResolveAssemblyReference.cache
+C:/Users/Kenny/Documents/Visual Studio 2015/Projects/SharpRakLib/SharpRakLib/bin/Debug/SharpRakLib.dll
+C:/Users/Kenny/Documents/Visual Studio 2015/Projects/SharpRakLib/SharpRakLib/bin/Debug/SharpRakLib.pdb
+C:/Users/Kenny/Documents/Visual Studio 2015/Projects/SharpRakLib/SharpRakLib/obj/Debug/SharpRakLib.dll
+C:/Users/Kenny/Documents/Visual Studio 2015/Projects/SharpRakLib/SharpRakLib/obj/Debug/SharpRakLib.pdb
+/home/kenny/github/SharpRakLib/src/SharpRakLib/obj/Debug/SharpRakLib.dll
+/home/kenny/github/SharpRakLib/src/SharpRakLib/obj/Debug/SharpRakLib.pdb

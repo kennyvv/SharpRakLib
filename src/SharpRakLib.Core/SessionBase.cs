@@ -96,6 +96,8 @@ namespace SharpRakLib.Core
                         var ack = new AckPacket();
                         ack.Packets = acks.ToArray();
                         SendPacket(ack);
+                        
+                      //  Console.WriteLine($"Sending acks.");
                     }
                 }
 
@@ -344,7 +346,11 @@ namespace SharpRakLib.Core
                 }
             }
             
-            _ackQueue.Enqueue(pk.SequenceNumber);
+            var ack = new AckPacket();
+            ack.Packets = new []{pk.SequenceNumber};
+            SendPacket(ack);
+            
+            //_ackQueue.Enqueue(pk.SequenceNumber);
             
 
             if (diff >= 1)
@@ -398,7 +404,9 @@ namespace SharpRakLib.Core
                 else
                 {
                     var m = _splitQueue[pk.SplitId];
-                    m.Add(pk.SplitIndex, pk);
+                    if (!m.ContainsKey(pk.SplitIndex))
+                        m.Add(pk.SplitIndex, pk);
+                    
                     _splitQueue[pk.SplitId] = m;
                 }
 
