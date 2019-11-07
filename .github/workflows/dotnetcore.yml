@@ -24,6 +24,6 @@ jobs:
       run: |
         cd src
         dotnet pack -c Release -o out SharpRakLib.Core/SharpRakLib.Core.csproj
-        dotnet nuget push out/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+        dotnet nuget push SharpRakLib.Core/out/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
