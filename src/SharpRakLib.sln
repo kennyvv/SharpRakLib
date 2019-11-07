@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRakLib", "SharpRakLib\SharpRakLib.csproj", "{D0E558FE-4A7B-4121-A8BA-5A46123B952E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingRakLib", "TestingRakLib\TestingRakLib.csproj", "{884F76B7-E470-49AC-9E93-F96A70ACD7FB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleServer", "SimpleServer\SimpleServer.csproj", "{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpRakLib.Core", "SharpRakLib.Core\SharpRakLib.Core.csproj", "{43F23471-611E-4EDB-830E-ABA3AB543D3B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleClient", "SimpleClient\SimpleClient.csproj", "{575DA22D-EDE0-4FB5-8EBB-802063B6D9C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proxy", "Proxy", "{DD1D1FE4-B2B7-499C-A8E7-8C5FD864DAA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleProxy", "Proxy\SimpleProxy\SimpleProxy.csproj", "{4A00222C-BEF9-4811-B6F3-247E86E37C6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D0E558FE-4A7B-4121-A8BA-5A46123B952E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0E558FE-4A7B-4121-A8BA-5A46123B952E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0E558FE-4A7B-4121-A8BA-5A46123B952E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0E558FE-4A7B-4121-A8BA-5A46123B952E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{884F76B7-E470-49AC-9E93-F96A70ACD7FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{884F76B7-E470-49AC-9E93-F96A70ACD7FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{884F76B7-E470-49AC-9E93-F96A70ACD7FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{884F76B7-E470-49AC-9E93-F96A70ACD7FB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F33C87A-7554-42A1-83A1-0FD16EDF07D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,8 +31,15 @@ Global
 		{575DA22D-EDE0-4FB5-8EBB-802063B6D9C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{575DA22D-EDE0-4FB5-8EBB-802063B6D9C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{575DA22D-EDE0-4FB5-8EBB-802063B6D9C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A00222C-BEF9-4811-B6F3-247E86E37C6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A00222C-BEF9-4811-B6F3-247E86E37C6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A00222C-BEF9-4811-B6F3-247E86E37C6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A00222C-BEF9-4811-B6F3-247E86E37C6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4A00222C-BEF9-4811-B6F3-247E86E37C6B} = {DD1D1FE4-B2B7-499C-A8E7-8C5FD864DAA6}
 	EndGlobalSection
 EndGlobal

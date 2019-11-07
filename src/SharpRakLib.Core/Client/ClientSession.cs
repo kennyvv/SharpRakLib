@@ -22,10 +22,8 @@ namespace SharpRakLib.Core.Client
         {
             var id = data[0];
 
-            if (id <= (byte) DefaultMessageIdTypes.ID_USER_PACKET_ENUM)
+            if (id <= (byte) 126)
             {
-                Log.Info($"Got RakNet Packet: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
-                
                 switch (id)
                 {
                     //Check for pings
@@ -39,6 +37,8 @@ namespace SharpRakLib.Core.Client
                         OpenConnectionReply1Packet reply = new OpenConnectionReply1Packet();
                         reply.Decode(data);
 
+                        _mtu = reply.MtuSize;
+                        
                         SendOpenConnectionRequest2(reply, Address);
                         break;
                     case JRakLibPlus.IdOpenConnectionReply2:
@@ -47,7 +47,7 @@ namespace SharpRakLib.Core.Client
                         OnOpenConnectionReply2(pack, Address);
                         break;
                     default:
-                        Log.Warn($"RakNet packet unhandled: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
+                        Log.Warn($"RakNet packet unhandled: {id} | 0x{id:X2}");
                         // Session?.ProcessPacket(packet.GetData());
                         break;
                 }
@@ -64,7 +64,7 @@ namespace SharpRakLib.Core.Client
                 }
                 else
                 {
-                    Log.Warn($"Got packet in unexpected state: {(DefaultMessageIdTypes) id} | 0x{id:X2}");
+                    Log.Warn($"Got packet in unexpected state: {id} | 0x{id:X2}");
                 }
             }
 
@@ -72,7 +72,7 @@ namespace SharpRakLib.Core.Client
         
         protected override bool HandleEncapsulated(EncapsulatedPacket pk)
         {
-            Log.Info($"Got encapsulated package: {pk} | 0x{pk.Payload[0]:X2}");
+          //  Log.Info($"Got encapsulated package: {pk} | 0x{pk.Payload[0]:X2}");
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace SharpRakLib.Core.Client
             var ep = new EncapsulatedPacket();
             ep.Reliability = Reliability.Unreliable;
             ep.Payload = connectPacket.Encode();
-            AddToQueue(ep, true);
+            AddPacketToQueue(ep, true);
 
             _state = Handshaking;
         }

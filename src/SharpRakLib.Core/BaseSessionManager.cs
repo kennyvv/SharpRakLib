@@ -93,7 +93,6 @@ namespace SharpRakLib.Core
                 catch (IOException e)
                 {
                     Log.Warn($"Exception while sending packet: {e.ToString()}");
-                    //this.logger.warn("java.io.IOException while sending packet: " + e.getMessage());
                 }
             }
             AddTask(0, HandlePackets); //Run next tick
@@ -133,7 +132,6 @@ namespace SharpRakLib.Core
         protected virtual void Run()
         {
             ServerTime.Restart();
-            //this.logger.info("Server starting...");
             Log.Info("Starting...");
             if (Bind())
             {

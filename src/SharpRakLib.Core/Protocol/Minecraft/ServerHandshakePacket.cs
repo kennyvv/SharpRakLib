@@ -12,22 +12,22 @@ namespace SharpRakLib.Protocol.Minecraft
 
 		public IPEndPoint[] SystemAddresses =
 		{
-			new SystemAddress("127.0.0.1", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4),
-			new SystemAddress("0.0.0.0", 0, 4)
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
+			new IPEndPoint(IPAddress.Loopback, 0),
 		};
 
 		public override void _encode(BedrockStream buffer)
 		{
 			buffer.Write(Address);
-			buffer.WriteShort(0);
+			buffer.WriteBEShort(0);
 			foreach (var a in SystemAddresses)
 			{
 				buffer.Write(a);

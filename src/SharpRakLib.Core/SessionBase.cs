@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using NLog;
 using SharpRakLib.Protocol;
+using SharpRakLib.Protocol.Minecraft;
 using SharpRakLib.Protocol.RakNet;
 using SharpRakLib.Server;
 
@@ -23,13 +26,16 @@ namespace SharpRakLib.Core
         public const int MaxSplitSize = 128;
         public const int MaxSplitCount = 4;
         
-        private readonly List<int> _ackQueue = new List<int>();
+        private readonly ConcurrentQueue<int> _ackQueue = new ConcurrentQueue<int>();
         protected long _clientId;
 
         private int _lastSeqNum = -1;
 
         private int _messageIndex;
         protected short _mtu;
+
+        public short MTU => _mtu;
+        
         private readonly List<int> _nackQueue = new List<int>();
         protected readonly Dictionary<int, CustomPacket> _recoveryQueue = new Dictionary<int, CustomPacket>();
 
@@ -41,7 +47,7 @@ namespace SharpRakLib.Core
             new Dictionary<int, Dictionary<int, EncapsulatedPacket>>();
 
         public int _state;
-        private long _timeLastPacketReceived;
+        protected long _timeLastPacketReceived;
         
         public IPEndPoint Address { get; }
         protected ISessionManager SessionManager { get; }
@@ -51,8 +57,9 @@ namespace SharpRakLib.Core
             _state = Connecting1;
             SessionManager = manager;
             _mtu = mtu;
-
-            SessionManager.AddTask(0, Update);
+            _state = Connecting1;
+            
+            SessionManager.AddTask(0, Tick);
         }
 
         public virtual void Disconnect(string reason)
@@ -60,7 +67,7 @@ namespace SharpRakLib.Core
             Log.Warn($"Disconnect: {reason}");
         }
         
-        private void Update()
+        private void Tick()
         {
             if (_state == Disconnected) return;
             
@@ -70,30 +77,46 @@ namespace SharpRakLib.Core
             }
             else
             {
-                lock (_ackQueue)
+
+                var ackCount = _ackQueue.Count;
+                if (ackCount != 0)
                 {
-                    if (_ackQueue.Count != 0)
+                    List<int> acks = new List<int>();
+
+                    for (int i = 0; i < ackCount; i++)
+                    {
+                        if (_ackQueue.TryDequeue(out var value))
+                        {
+                            acks.Add(value);
+                        }
+                    }
+
+                    if (acks.Count > 0)
                     {
                         var ack = new AckPacket();
-                        ack.Packets = _ackQueue.ToArray();
+                        ack.Packets = acks.ToArray();
                         SendPacket(ack);
-                        _ackQueue.Clear();
+                        
+                      //  Console.WriteLine($"Sending acks.");
                     }
                 }
+
                 lock (_nackQueue)
                 {
-                    if (_nackQueue.Count != 0)
+                    var nacks = _nackQueue.ToArray();
+                    _nackQueue.Clear();
+                    
+                    if (nacks.Length > 0)
                     {
                         var nack = new NackPacket();
-                        nack.Packets = _nackQueue.ToArray();
+                        nack.Packets = nacks;
                         SendPacket(nack);
-                        _nackQueue.Clear();
                     }
                 }
 
                 SendQueuedPackets();
 
-                SessionManager.AddTask(0, Update);
+                SessionManager.AddTask(1, Tick);
             }
         }
 
@@ -105,21 +128,17 @@ namespace SharpRakLib.Core
             {
                 queue = _sendQueue;
 
-                if (queue.Packets.Count != 0)
-                {
-                    _sendQueue = new CustomPackets.CustomPacket4();
-                }
-                else
+                if (queue.Packets.Count == 0)
                 {
                     return;
                 }
+                
+                _sendQueue = new CustomPackets.CustomPacket0();
             }
 
             queue.SequenceNumber = Interlocked.Increment(ref _sendSeqNum);
             SendPacket(queue);
-            
-            Log.Info($"Sending queue: {queue.Packets.Count}");
-            
+
             lock (_recoveryQueue)
             {
                 _recoveryQueue.Add(queue.SequenceNumber, queue);
@@ -128,24 +147,101 @@ namespace SharpRakLib.Core
 
         protected void SendPacket(RakNetPacket packet)
         {
-            Log.Info($"Sending: {packet.ToString()} | MTU: {_mtu}");
-			
             SessionManager.AddPacketToQueue(packet, Address);
         }
 
-        public void AddToQueue(EncapsulatedPacket pkt, bool immediate)
+        private static IEnumerable<byte[]> ArraySplit(byte[] bArray, int intBufforLengt)
+        {
+            int bArrayLenght = bArray.Length;
+            byte[] bReturn;
+
+            int i = 0;
+            for (; bArrayLenght > (i + 1) * intBufforLengt; i++)
+            {
+                bReturn = new byte[intBufforLengt];
+
+                Buffer.BlockCopy(bArray, i * intBufforLengt, bReturn, 0, intBufforLengt);
+                yield return bReturn;
+            }
+
+            int intBufforLeft = bArrayLenght - i * intBufforLengt;
+            if (intBufforLeft > 0)
+            {
+                bReturn = new byte[intBufforLeft];
+
+                Buffer.BlockCopy(bArray, i * intBufforLengt, bReturn, 0, intBufforLeft);
+                yield return bReturn;
+            }
+        }
+        
+        public void AddPacketToQueue(EncapsulatedPacket pkt, bool immediate)
+        {
+            switch (pkt.Reliability)
+            {
+                case Reliability.Reliable:
+                case Reliability.ReliableOrdered:
+                //TODO: OrderIndex
+                case Reliability.ReliableSequenced:
+                case Reliability.ReliableWithAckReceipt:
+                case Reliability.ReliableOrderedWithAckReceipt:
+                    pkt.MessageIndex = Interlocked.Increment(ref _messageIndex);
+                    break;
+            }
+
+            var packetSize = pkt.Encode().Length;
+            if (packetSize + 4 > _mtu)
+            {
+                
+                // Too big to be sent in one packet, need to be split
+                var buffers = ArraySplit(pkt.Payload, _mtu - 34).ToArray();
+
+                var splitId = Interlocked.Increment(ref _splitId) % 65536;
+                for (var count = 0; count < buffers.Length; count++)
+                {
+                    var ep = new EncapsulatedPacket();
+                    ep.SplitId = splitId;
+                    ep.Split = true;
+                    ep.SplitCount = buffers.Length;
+                    ep.Reliability = pkt.Reliability;
+                    ep.SplitIndex = count;
+                    ep.Payload = buffers[count];
+
+                    if (count > 0)
+                    {
+                        ep.MessageIndex = Interlocked.Increment(ref _messageIndex);
+                    }
+                    else
+                    {
+                        ep.MessageIndex = pkt.MessageIndex;
+                    }
+                    if (ep.Reliability == Reliability.ReliableOrdered)
+                    {
+                        ep.OrderChannel = pkt.OrderChannel;
+                        ep.OrderIndex = pkt.OrderIndex;
+                    }
+
+                    AddToQueue(ep, true);
+                }
+            }
+            else
+            {
+                AddToQueue(pkt, immediate);
+            }
+        }
+        
+        private void AddToQueue(EncapsulatedPacket pkt, bool immediate)
         {
             if (immediate)
             {
                 CustomPacket cp = new CustomPackets.CustomPacket0();
                 cp.Packets.Add(pkt);
                 cp.SequenceNumber = Interlocked.Increment(ref _sendSeqNum);
+
                 SendPacket(cp);
                 lock (_recoveryQueue)
                 {
                     _recoveryQueue.Add(cp.SequenceNumber, cp);
                 }
-                Log.Info($"Sent immediate: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]}");
             }
             else
             {
@@ -155,9 +251,8 @@ namespace SharpRakLib.Core
                     {
                         SendQueuedPackets();
                     }
-                    
+
                     _sendQueue.Packets.Add(pkt);
-                    Log.Info($"Queued: {pkt.ToString()} | {(DefaultMessageIdTypes) pkt.Payload[0]} | MTU: {_mtu} | Queued: {_sendQueue.Packets.Count}");
                 }
             }
         }
@@ -178,9 +273,7 @@ namespace SharpRakLib.Core
                     }
                     var ack = new AckPacket();
                     ack.Decode(data);
-                    
-                    Log.Info($"Got ACK");
-                    
+
                     lock (_recoveryQueue)
                     {
                         foreach (var seq in ack.Packets)
@@ -203,8 +296,6 @@ namespace SharpRakLib.Core
                     var nack = new NackPacket();
                     nack.Decode(data);
 
-                    Log.Info($"Got NACK");
-                    
                     lock (_recoveryQueue)
                     {
                         foreach (var seq in nack.Packets)
@@ -254,17 +345,19 @@ namespace SharpRakLib.Core
                     }
                 }
             }
-            lock (_ackQueue)
-            {
-                _ackQueue.Add(pk.SequenceNumber);
-            }
+            
+            var ack = new AckPacket();
+            ack.Packets = new []{pk.SequenceNumber};
+            SendPacket(ack);
+            
+            //_ackQueue.Enqueue(pk.SequenceNumber);
+            
 
             if (diff >= 1)
             {
                 _lastSeqNum = pk.SequenceNumber;
             }
-
-            Log.Info($"Sequence: {pk.SequenceNumber} | Packets: {pk.Packets.Count}");
+            
             pk.Packets.ForEach(HandleEncapsulatedPacket);
         }
 
@@ -281,15 +374,6 @@ namespace SharpRakLib.Core
             
             if (!HandleEncapsulated(pk))
             {
-                //pk.Payload
-                /*Log.Warn($"Payload (0x{pk.ReadId:X2}):");
-                foreach (var i in pk.Payload)
-                {
-                    Console.Write(i.ToString("x2") + " ");
-                }
-                Console.WriteLine();
-                Console.WriteLine();*/
-                
                 SessionManager.HookManager.ActivateHook(HookManager.Hook.PacketRecieved, this, pk);
             }
         }
@@ -312,6 +396,7 @@ namespace SharpRakLib.Core
                 {
                     if (_splitQueue.Count >= MaxSplitCount)
                         return; //Too many split packets in the queue will increase memory usage
+                    
                     var m = new Dictionary<int, EncapsulatedPacket>();
                     m.Add(pk.SplitIndex, pk);
                     _splitQueue.Add(pk.SplitId, m);
@@ -319,8 +404,10 @@ namespace SharpRakLib.Core
                 else
                 {
                     var m = _splitQueue[pk.SplitId];
-                    m.Add(pk.SplitIndex, pk);
-                    _splitQueue.Add(pk.SplitId, m);
+                    if (!m.ContainsKey(pk.SplitIndex))
+                        m.Add(pk.SplitIndex, pk);
+                    
+                    _splitQueue[pk.SplitId] = m;
                 }
 
                 if (_splitQueue[pk.SplitId].Count == pk.SplitCount)
@@ -339,8 +426,7 @@ namespace SharpRakLib.Core
                         ep.Payload = stream.ToArray();
                     }
                     _splitQueue.Remove(pk.SplitId);
-
-                    Log.Info($"Read split packet");
+                    
                     HandleEncapsulatedPacket(ep);
                 }
             }

@@ -13,7 +13,7 @@ namespace SharpRakLib.Protocol.RakNet
 		{
 			//IBuffer payload = JavaByteBuffer.Allocate(0, false);
 			var ranges = Slize(Packets.ToList());
-			buffer.WriteShort((short) ranges.Count);
+			buffer.WriteBEShort((short) ranges.Count);
 			foreach (var range in ranges)
 			{
 				var singleEntry = (byte) (range.Item1 == range.Item2 ? 0x01 : 0);
@@ -44,15 +44,15 @@ namespace SharpRakLib.Protocol.RakNet
 						//Forget about duplicated packets (bad queues?)
 						if (start == last)
 						{
-							payload.PutBoolean(true);
-							payload.PutLTriad(start);
+							buffer.WriteBool(true);
+							buffer.WriteLTriad(start);
 							start = last = current;
 						}
 						else
 						{
-							payload.PutBoolean(false);
-							payload.PutLTriad(start);
-							payload.PutLTriad(last);
+							buffer.WriteBool(false);
+							buffer.WriteLTriad(start);
+							buffer.WriteLTriad(last);
 							start = last = current;
 						}
 						records = records + 1;
@@ -61,17 +61,17 @@ namespace SharpRakLib.Protocol.RakNet
 
 				if (start == last)
 				{
-					payload.PutBoolean(true);
-					payload.PutLTriad(start);
+					buffer.WriteBool(true);
+					buffer.WriteLTriad(start);
 				}
 				else
 				{
-					payload.PutBoolean(false);
-					payload.PutLTriad(start);
-					payload.PutLTriad(last);
+					buffer.WriteBool(false);
+					buffer.WriteLTriad(start);
+					buffer.WriteLTriad(last);
 				}
 				records = records + 1;
-			}
+			}*/
 			/*
         buffer = JavaByteBuffer.allocate(payload.toByteArray().length + 3, ByteOrder.BIG_ENDIAN);
         buffer.putByte(getPID());
@@ -82,7 +82,7 @@ namespace SharpRakLib.Protocol.RakNet
 
 		public override void _decode(BedrockStream buffer)
 		{
-			int count = buffer.ReadShort();
+			int count = buffer.ReadBEShort();
 			var packets = new List<int>();
 			var cnt = 0;
 			for (var i = 0; i < count; i++)
