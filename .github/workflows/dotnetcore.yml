@@ -23,7 +23,7 @@ jobs:
     - name: Package Release
       run: |
         cd src
-        dotnet pack -c Release -o out --no-build SharpRakLib.Core/SharpRakLib.Core.csproj
+        dotnet pack -c Release -o out SharpRakLib.Core/SharpRakLib.Core.csproj
         cd ..
       
     - name: Push to NuGet
